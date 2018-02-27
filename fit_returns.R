@@ -40,3 +40,20 @@ qqnorm(returns)
 
 # the idea is that return follows a normal distribution and implies
 # that stock price follows a lognormal distribution, where S(t) = S(0)exp(r)
+
+# alternatively, we might want to try autoregressive (AR) models
+library('ggplot2')
+library('forecast')
+library('tseries')
+
+sp500 <- as.numeric(get_return("^GSPC", from_date, to_date))
+sp500_train <-sp500[1:(0.9 * length(sp500))] 
+sp500_test <- sp500[(0.9 * length(sp500) + 1):length(sp500)] 
+
+ar.fit <- arima(sp500_train, order = c(2, 0, 0))
+ar.preds <- predict(ar.fit, n.ahead = (length(sp500) - (0.9 * length(sp500))))$pred
+ar.forecast <- forecast(ar.fit, h = 100)
+
+plot(ar.forecast, main = "AR forecasts for asset returns")
+
+accuracy(ar.preds, sp500_test)[2] 
