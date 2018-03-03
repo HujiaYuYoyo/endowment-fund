@@ -1,39 +1,56 @@
 #library(fitdistrplus)
 library(quantmod)
+library(mvtnorm)
 library(MASS)
 
-assets = c("^GSPC")
+# clear workspace
+rm(list = ls())
 
-# define functions here gets the yearly return of an asset denoted by its symbol from Yahoo Finance
+# stocks we're using
+stocks = c("^GSPC")
+
+# bonds we're using
+bonds = c("QQQ")
+
+# alternative investments
+alternative = c()
+
+# cash
+cash = c()
+
+assets = c(stocks, bonds, alternative, cash)
+
+# gets the return of an asset denoted by its symbol from Yahoo Finance
 get_return <- function(symbol, from_date, to_date) {
   s = getSymbols(symbol, from=from_date, auto.assign = F)
   s_adj_close = data.frame(s)[,6]
   
-  periodReturn(s, period='weekly',from=from_date, to=to_state)
+  periodReturn(s, period='yearly',from=from_date, to=to_state)  # change to monthly, if desired, later
 }
 
-
-from_date = "1990-01-01"
+returns = c()
+from_date = "2000-01-01"
 to_date = "2018-01-01"
 
 # iterate through all assets and do following:
-# 1. get weekly (daily) return 
-# 2. fit lognormal distr. to return
-# 3. convert to yearly return
-#      - mean should be 52 * E[weekly return]
-#      - std dev should be sqrt(52) * Var(weekly return)
-# 4. print params for distr.
+# 1. get returns
+# 2. add to vector of returns
+# then:
+# 3. fit to multivariate distribution
+# 4. print parameters
 for (i in 1:length(assets)) { 
   asset <- assets[i]
-  returns <- as.numeric(get_return(asset, from_date, to_date))
-  fit <- fitdistr(returns, "normal")
-  yearly_mean <- fit$estimate['mean'] * 52
-  yearly_sd <- fit$estimate['sd'] * 52
-  
-  print(fit)
-  cat("Asset:", asset, "\n")
-  cat("Fitted mean:", yearly_mean, "\tFitted sd:", yearly_sd, "\n\n")
+  return <- as.numeric(get_return(asset, from_date, to_date))
+  returns <- rbind(returns, return)
 }
+
+log_returns <- log(returns + 1)
+df <- data.frame(log_returns)
+row.names(df) <- assets
+
+means = rowMeans(df)
+sd = diag(sqrt(cov(t(df))))
+corrs = cor(t(df))
 
 # use qq-plot to check for goodness-of-fit
 qqnorm(returns)
