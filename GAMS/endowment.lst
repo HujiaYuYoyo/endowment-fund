@@ -1,0 +1,320 @@
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/04/18 17:50:35 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+      Endowment Fund Management -
+      This model represents a multistage stochastic program exploring managing
+      an endowment fund portfolio, with an initial deterministic stage for 
+      asset allocation and then rebalancing in each stochastic stage.
+   7   
+   8  * Core Model
+   9  Set
+  10          t       "stages"        /1*3/
+  11          dt(t)   "deterministic stage" /1/
+  12          st(t)   "stochastic stages"     /2*3/
+  13          i       "assets"        /stock, cbond, gbond, alter, cash/
+  14          ci(i) "cash asset" /cash/
+  15          ai(i) "non-cash assets" /stock, cbond, gbond, alter/
+  16          s       "scenarios" /s1*s5/;
+  17   
+  18  Positive Variables
+  19          x(i, t) "dollar amount in asset i in stage t"
+  20          y(ai, st)       "amount sold of non-cash asset i in stage t"
+  21          z(ai, st)       "amount bought of non-cash asset i in stage t";
+  22   
+  23  Variable
+  24          utility;
+  25   
+  26  Scalars
+  27          W               "initial wealth"        /1000000/
+  28          alpha   "power utility parameter"       /20/
+  29          mu              "transaction cost - sell"       /0.0005/
+  30          nu              "transaction cost - buy"        /0.0005/
+  31   
+  32  Table r1s(s,i) "stage 1 scenario returns from assets (plug in with real values later)"
+  33          stock   cbond   gbond   alter   cash
+  34  s1      1.300   1.225   1.149   1.295   1.020
+  35  s2      1.103   1.290   1.260   1.120   1.011
+  36  s3      0.954   0.728   0.988   0.733   0.998
+  37  s4      0.984   0.889   0.970   0.860   0.950
+  38  s5      1.103   1.203   1.149   1.34    1.040 ;
+  39   
+  40  Table r2s(s,i) "stage 2 scenario returns from assets (plug in with real values later)"
+  41          stock   cbond   gbond   alter   cash
+  42  s1      1.300   1.225   1.149   1.295   1.020
+  43  s2      1.103   1.290   1.260   1.120   1.011
+  44  s3      0.954   0.728   0.988   0.733   0.998
+  45  s4      0.984   0.889   0.970   0.860   0.950
+  46  s5      1.103   1.203   1.149   1.34    1.040 ;
+  47   
+  48  Table r3s(s,i) "stage 3 scenario returns from assets (plug in with real values later)"
+  49          stock   cbond   gbond   alter   cash
+  50  s1      1.300   1.225   1.149   1.295   1.020
+  51  s2      1.103   1.290   1.260   1.120   1.011
+  52  s3      0.954   0.728   0.988   0.733   0.998
+  53  s4      0.984   0.889   0.970   0.860   0.950
+  54  s5      1.103   1.203   1.149   1.34    1.040 ;
+  55   
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/04/18 17:50:35 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+  56  Parameters
+  57  * Random parameters
+  58          r1(i) "return r.v. of asset at end of stage 1"
+  59  /
+  60  stock   1.0
+  61  cbond   1.0
+  62  gbond   1.0
+  63  alter   1.0
+  64  cash    1.0
+  65  /
+  66   
+  67          r2(i) "return r.v. of asset at end of stage 2"
+  68  /
+  69  stock   1.0
+  70  cbond   1.0
+  71  gbond   1.0
+  72  alter   1.0
+  73  cash    1.0
+  74  /
+  75   
+  76          r3(i) "return r.v. of asset at end of stage 3"
+  77  /
+  78  stock   1.0
+  79  cbond   1.0
+  80  gbond   1.0
+  81  alter   1.0
+  82  cash    1.0
+  83  /
+  84   
+  85  * Remaining parameters
+  86          r(i, t) "return of asset i at end of stage t"
+  87          p(s) "scenario probability";
+  88   
+  89  p(s) = 1/card(s);
+  90  r(i, "1") = r1(i);
+  91  r(i, "2") = r2(i);
+  92  r(i, "3") = r3(i);
+  93  x.l(i, "1") = 20000;
+  94   
+  95  Equations
+  96          defutility "definition of utility"
+  97          balance(dt)     "initial asset allocation equation"
+  98          rebalance1(ai, st) "sbalance equation for assets"
+  99          rebalance2(st) "balance equation for cash";
+ 100   
+ 101  defutility..    utility =e= ((sum((i, t), r(i, t) * x(i, t)))**(1-alpha)-1)/(1-alpha);
+ 102  balance(dt)..   W =e= sum(i, x(i, dt));
+ 103  rebalance1(ai, st).. x(ai, st) + y(ai, st) - z(ai, st) =e= -r(ai, st-1)*x(ai, st-1);
+ 104  rebalance2(st).. -r("cash", st-1)*x("cash", st-1)+x("cash", st) =e= sum(ai, (1-mu)*y(ai, st)-(1+nu)*z(ai, st));
+ 105   
+ 106  Model endowment /all/;
+ 107   
+ 108  * EMP Annotations
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/04/18 17:50:35 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 109  File emp / "/Users/michellezhang/Desktop/endowment_fund/GAMS/225a/empinfo.dat" /;
+ 110  put emp
+ 111   / "jrandvar r1('stock') r1('cbond') r1('gbond') r1('alter') r1('cash')"
+ 112  loop(s,
+ 113    put / p(s) r1s(s,"stock") r1s(s,"cbond") r1s(s,"gbond") r1s(s,"alter") r1s(s,"cash"));
+ 114  put /
+ 115   
+ 116   / "jrandvar r2('stock') r2('cbond') r2('gbond') r2('alter') r2('cash')"
+ 117  loop(s,
+ 118    put / p(s) r2s(s,"stock") r2s(s,"cbond") r2s(s,"gbond") r2s(s,"alter") r2s(s,"cash"));
+ 119  put /
+ 120   
+ 121   / "jrandvar r3('stock') r3('cbond') r3('gbond') r3('alter') r3('cash')"
+ 122  loop(s,
+ 123    put / p(s) r3s(s,"stock") r3s(s,"cbond") r3s(s,"gbond") r3s(s,"alter") r3s(s,"cash"));
+ 124  put /
+ 125   
+ 126  $onput
+ 127  stage 1 r1 x("1") balance("1")
+ 128  stage 2 r2 x("2") y("2") z("2") rebalance1("2") rebalance2("2") 
+ 129  stage 3 r3 x("3") y("3") z("3") rebalance1("3") rebalance2("3")
+ 130  $offput
+ 131  putclose emp;
+ 132   
+ 133  option emp = lindo;
+ 134  solve endowment using emp max utility;
+
+
+COMPILATION TIME     =        0.001 SECONDS      3 MB  25.0.2 r65346 DEX-DEG
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/04/18 17:50:35 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE endowment Using EMP From line 134
+
+
+---- defutility  =E=  definition of utility
+
+defutility..  - (9.99999999999998E-101)*x(stock,1) - (9.99999999999998E-101)*x(stock,2) - (9.99999999999998E-101)*x(stock,3) - (9.99999999999998E-101)*x(cbond,1) - (9.99999999999998E-101)*x(cbond,2) - (9.99999999999998E-101)*x(cbond,3)
+     
+      - (9.99999999999998E-101)*x(gbond,1) - (9.99999999999998E-101)*x(gbond,2) - (9.99999999999998E-101)*x(gbond,3) - (9.99999999999998E-101)*x(alter,1) - (9.99999999999998E-101)*x(alter,2) - (9.99999999999998E-101)*x(alter,3)
+     
+      - (9.99999999999998E-101)*x(cash,1) - (9.99999999999998E-101)*x(cash,2) - (9.99999999999998E-101)*x(cash,3) + utility =E= 0.0526315789473684 ; (LHS = 0, INFES = 0.0526315789473684 ****)
+     
+
+---- balance  =E=  initial asset allocation equation
+
+balance(1)..  - x(stock,1) - x(cbond,1) - x(gbond,1) - x(alter,1) - x(cash,1) =E= -1000000 ; (LHS = -100000, INFES = 900000 ****)
+     
+
+---- rebalance1  =E=  sbalance equation for assets
+
+rebalance1(stock,2)..  x(stock,2) + y(stock,2) - z(stock,2) =E= 0 ; (LHS = 0)
+     
+rebalance1(stock,3)..  x(stock,2) + x(stock,3) + y(stock,3) - z(stock,3) =E= 0 ; (LHS = 0)
+     
+rebalance1(cbond,2)..  x(cbond,2) + y(cbond,2) - z(cbond,2) =E= 0 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- rebalance2  =E=  balance equation for cash
+
+rebalance2(2)..  x(cash,2) - 0.9995*y(stock,2) - 0.9995*y(cbond,2) - 0.9995*y(gbond,2) - 0.9995*y(alter,2) + 1.0005*z(stock,2) + 1.0005*z(cbond,2) + 1.0005*z(gbond,2) + 1.0005*z(alter,2) =E= 0 ; (LHS = 0)
+     
+rebalance2(3)..  - x(cash,2) + x(cash,3) - 0.9995*y(stock,3) - 0.9995*y(cbond,3) - 0.9995*y(gbond,3) - 0.9995*y(alter,3) + 1.0005*z(stock,3) + 1.0005*z(cbond,3) + 1.0005*z(gbond,3) + 1.0005*z(alter,3) =E= 0 ; (LHS = 0)
+     
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/04/18 17:50:35 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE endowment Using EMP From line 134
+
+
+---- x  dollar amount in asset i in stage t
+
+x(stock,1)
+                (.LO, .L, .UP, .M = 0, 20000, +INF, 0)
+ (-1.0000E-100) defutility
+       -1       balance(1)
+
+x(stock,2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+ (-1.0000E-100) defutility
+        1       rebalance1(stock,2)
+        1       rebalance1(stock,3)
+
+x(stock,3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+ (-1.0000E-100) defutility
+        1       rebalance1(stock,3)
+
+REMAINING 12 ENTRIES SKIPPED
+
+---- y  amount sold of non-cash asset i in stage t
+
+y(stock,2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       rebalance1(stock,2)
+       -0.9995  rebalance2(2)
+
+y(stock,3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       rebalance1(stock,3)
+       -0.9995  rebalance2(3)
+
+y(cbond,2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       rebalance1(cbond,2)
+       -0.9995  rebalance2(2)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- z  amount bought of non-cash asset i in stage t
+
+z(stock,2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       rebalance1(stock,2)
+        1.0005  rebalance2(2)
+
+z(stock,3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       rebalance1(stock,3)
+        1.0005  rebalance2(3)
+
+z(cbond,2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/04/18 17:50:35 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE endowment Using EMP From line 134
+
+
+     z  amount bought of non-cash asset i in stage t
+
+       -1       rebalance1(cbond,2)
+        1.0005  rebalance2(2)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- utility  
+
+utility
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       defutility
+
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/04/18 17:50:35 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE endowment Using EMP From line 134
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           4     SINGLE EQUATIONS           12
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES           32
+NON ZERO ELEMENTS            68     NON LINEAR N-Z             15
+DERIVATIVE POOL              20     CONSTANT POOL              17
+CODE LENGTH                  21
+
+
+GENERATION TIME      =        0.005 SECONDS      4 MB  25.0.2 r65346 DEX-DEG
+
+
+EXECUTION TIME       =        0.006 SECONDS      4 MB  25.0.2 r65346 DEX-DEG
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/04/18 17:50:35 Page 8
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE endowment Using EMP From line 134
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   endowment           OBJECTIVE  utility
+     TYPE    EMP                 DIRECTION  MAXIMIZE
+     SOLVER  LINDO               FROM LINE  134
+
+**** SOLVER STATUS     6 Capability Problems       
+**** MODEL STATUS      14 No Solution Returned     
+**** OBJECTIVE VALUE               NA
+
+ RESOURCE USAGE, LIMIT         NA          1000.000
+ ITERATION COUNT, LIMIT        NA    2000000000
+ EVALUATION ERRORS             NA             0
+*** Model of type EMP, but no stochastic info available
+*** Cannot handle non-stochastic EMP models
+*** Problem in getObjects
+
+No solution returned
+
+**** REPORT FILE SUMMARY
+
+emp /Users/michellezhang/Desktop/endowment_fund/GAMS/225a/empinfo.dat
+
+
+EXECUTION TIME       =        0.001 SECONDS      2 MB  25.0.2 r65346 DEX-DEG
+
+
+USER: GAMS Development Corporation, USA              G871201/0000CA-ANY
+      Free Demo, +1 202-342-0180, support@gams.com, www.gams.com DC0000
+
+
+**** FILE SUMMARY
+
+Input      /Users/michellezhang/Desktop/endowment_fund/GAMS/endowment.gms
+Output     /Users/michellezhang/Desktop/endowment_fund/GAMS/endowment.lst
