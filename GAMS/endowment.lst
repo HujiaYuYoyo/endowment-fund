@@ -1,4 +1,4 @@
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/05/18 20:11:33 Page 1
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -19,266 +19,340 @@ C o m p i l a t i o n
   14   
   15  Parameter rbar(i) "mean returns"
   16  /
-  17  stock   1.0653
-  18  cbond   1.0440
-  19  gbond   1.0336
-  20  alter   1.0880
-  21  cash    1.0214
+  17  stock   0.06044
+  18  cbond   -0.03083
+  19  gbond   -0.00891
+  20  alter   0.054306
+  21  cash    -0.00267
   22  /;
   23   
   24  Parameter rstd(i) "standard deviation of returns"
   25  /
-  26  stock   0.5233
-  27  cbond   0.1390
-  28  gbond   0.3820
-  29  alter   0.1280
-  30  cash    0.9395
+  26  stock   0.15326
+  27  cbond   0.14756
+  28  gbond   0.09429
+  29  alter   0.04826
+  30  cash    0.00737
   31  /;
   32   
   33  Table chol(i, ii) "covariance matrix of returns"
   34          stock   cbond   gbond   alter   cash
-  35  stock   1.020   1.235   0.950   0.102   0.238
-  36  cbond   0.000   0.200   1.392   1.580   0.280
-  37  gbond   0.000   0.000   1.029   0.138   1.000
-  38  alter   0.000   0.000   0.000   0.481   1.390
-  39  cash    0.000   0.000   0.000   0.000   0.021;
+  35  stock   0.15326 0.04216 -0.0074 0.00097 0.03874
+  36  cbond   0.00000 0.20000 0.08114 0.00550 0.00551
+  37  gbond   0.00000 0.00000 0.04746 0.00061 -0.00863
+  38  alter   0.00000 0.00000 0.00000 0.00476 -0.00341
+  39  cash    0.00000 0.00000 0.00000 0.00000 0.02668;
   40   
   41  * Model params
   42  Scalar
   43          w0                      "initial funds/wealth"          /1000000/
-  44          wtarget         "wealth target scale"           /1.5/;
+  44          wtarget         "wealth target scale"           /1050000/;
   45   
   46  Parameter
   47          x0(i)   "amount of initial holdings in assets";
   48   
-  49  x0(ai) = 0.0;
+  49  x0(ai) = 0;
   50  x0(ci) = w0;
   51  display x0;
   52   
-  53  Parameter
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/05/18 20:11:33 Page 2
+  53  Parameter strc(i)       "sell transaction cost/asset"
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
-  54          strc(i)         "sell transaction cost/asset"
-  55          btrc(i)         "buy transaction cost/asset";
-  56   
-  57  strc(i) = 0.0005;
-  58  btrc(i) = 0.0005;
-  59   
-  60  * Settings - define scenarios
-  61  options limrow = 0, limcol = 0;
-  62  option reslim = 1000000;
-  63  option iterlim = 1000000;
-  64  option solprint = off;
-  65  option lp = minos5;
-  66  option nlp = minos5;
-  67   
-  68  Set
-  69          w1      "first stage scenarios"         /w1_01*w1_05/
-  70          w2      "second stage scenarios"        /w2_01*w2_05/
-  71          w3      "third stage scenarios"         /w3_01*w3_05/;
-  72   
-  73  Scalars
-  74          n1      "number of scenarios in stage 1"
-  75          n2      "number of scenarios in stage 2"
-  76          n3      "number of scenarios in stage 3";
-  77   
-  78  n1 = card(w1);
-  79  n2 = card(w2);
-  80  n3 = card(w3);
-  81  display n1, n2, n3;
-  82   
-  83  Parameter
-  84          nall    "total number of scenarios";
-  85   
-  86  nall = n1 * n2 * n3;
-  87   
-  88  * Cash flow - define and initializing
-  89  Parameters
-  90          cf1                             "cash flow into 1 from end of stage 0"
-  91          cf2(w1)                 "cash flow into 2 from end of stage 1"
-  92          cf3(w1,w2)              "cash flow into 3 from end of stage 2"
-  93          cf4(w1,w2,w3)   "cash flow into 4 from end of stage 3";
-  94   
-  95  cf1                             = 0.0;
-  96  cf2(w1)                 = 0.0;
-  97  cf3(w1,w2)              = 0.0;
-  98  cf4(w1,w2,w3)   = 0.0;
+  54  /
+  55  stock   0.030
+  56  cbond   0.015
+  57  gbond   0.015
+  58  alter   0.01
+  59  cash    0.00
+  60  /;
+  61   
+  62  Parameter btrc(i)       "buy transaction cost/asset"
+  63  /
+  64  stock   0.030
+  65  cbond   0.015
+  66  gbond   0.015
+  67  alter   0.01
+  68  cash    0.00
+  69  /;
+  70   
+  71  *strc(i) = 0.0005;
+  72  *btrc(i) = 0.0005;
+  73   
+  74  * Settings - define scenarios
+  75  options limrow = 0, limcol = 0;
+  76  option reslim = 1000000;
+  77  option iterlim = 1000000;
+  78  option solprint = off;
+  79  option lp = minos5;
+  80  option nlp = minos5;
+  81   
+  82  Set
+  83          w1      "first stage scenarios"         /w1_01*w1_05/
+  84          w2      "second stage scenarios"        /w2_01*w2_05/
+  85          w3      "third stage scenarios"         /w3_01*w3_05/;
+  86   
+  87  Scalars
+  88          n1      "number of scenarios in stage 1"
+  89          n2      "number of scenarios in stage 2"
+  90          n3      "number of scenarios in stage 3";
+  91   
+  92  n1 = card(w1);
+  93  n2 = card(w2);
+  94  n3 = card(w3);
+  95  display n1, n2, n3;
+  96   
+  97  Parameter
+  98          nall    "total number of scenarios";
   99   
- 100  * Sampling - use cholesky and lognormal
- 101  Parameters
- 102          r1(i, w1)       "return scenarios at end of stage 1"
- 103          r2(i, w2)       "return scenarios at end of stage 2"
- 104          r3(i, w3)       "return scenarios at end of stage 3";
- 105   
- 106  Parameters
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/05/18 20:11:33 Page 3
+ 100  nall = n1 * n2 * n3;
+ 101  display nall;
+ 102   
+ 103  * Cash flow - define and initializing
+ 104  Parameters
+ 105          cf1                             "cash flow into 1 from end of stage 0"
+ 106          cf2(w1)                 "cash flow into 2 from end of stage 1"
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
- 107          r1bar_est(i)    "estimate for mean return 1"
- 108          r2bar_est(i)    "estimate for mean return 2"
- 109          r3bar_est(i)    "estimate for mean return 3"
- 110          r1std_est(i)    "estimate for std dev return 1"
- 111          r2std_est(i)    "estimate for std dev return 2"
- 112          r3std_est(i)    "estimate for std dev return 3"
- 113          nv(ii)  "normal variable samples";
+ 107          cf3(w1,w2)              "cash flow into 3 from end of stage 2"
+ 108          cf4(w1,w2,w3)   "cash flow into 4 from end of stage 3";
+ 109   
+ 110  cf1                             = 0.0;
+ 111  cf2(w1)                 = 0.0;
+ 112  cf3(w1,w2)              = 0.0;
+ 113  cf4(w1,w2,w3)   = 0.0;
  114   
- 115  loop(w1,
- 116          loop(ii,
- 117                  nv(ii) = normal(0,1);
- 118          );
- 119          r1(i, w1) = sum(ii, chol(ii, i) * nv(ii));
- 120  );
- 121   
- 122  loop(w2,
- 123          loop(ii,
- 124                  nv(ii) = normal(0,1);
- 125          );
- 126          r2(i, w2) = sum(ii, chol(ii, i) * nv(ii));
- 127  );
- 128   
- 129  loop(w3,
- 130          loop(ii,
- 131                  nv(ii) = normal(0,1);
- 132          );
- 133          r3(i, w3) = sum(ii, chol(ii, i) * nv(ii));
- 134  );
- 135  display r1, r2, r3;
+ 115  * Sampling - use cholesky and lognormal
+ 116  Parameters
+ 117          r1(i, w1)       "return scenarios at end of stage 1"
+ 118          r2(i, w2)       "return scenarios at end of stage 2"
+ 119          r3(i, w3)       "return scenarios at end of stage 3";
+ 120   
+ 121  Parameters
+ 122          r1bar_est(i)    "estimate for mean return 1"
+ 123          r2bar_est(i)    "estimate for mean return 2"
+ 124          r3bar_est(i)    "estimate for mean return 3"
+ 125          r1std_est(i)    "estimate for std dev return 1"
+ 126          r2std_est(i)    "estimate for std dev return 2"
+ 127          r3std_est(i)    "estimate for std dev return 3"
+ 128          nv(ii)  "normal variable samples";
+ 129   
+ 130  loop(w1,
+ 131          loop(ii,
+ 132                  nv(ii) = normal(0,1);
+ 133          );
+ 134          r1(i, w1) = sum(ii, chol(ii, i) * nv(ii));
+ 135  );
  136   
- 137  r1bar_est(i) = sum(w1, r1(i,w1))/n1;
- 138  r2bar_est(i) = sum(w2, r2(i,w2))/n2;
- 139  r3bar_est(i) = sum(w3, r3(i,w3))/n3;
- 140   
- 141  * Sampling - mean correction
- 142  r1(i, w1) = r1(i, w1) - r1bar_est(i);
- 143  r2(i, w2) = r2(i, w2) - r2bar_est(i);
- 144  r3(i, w3) = r3(i, w3) - r3bar_est(i);
- 145   
- 146  r1bar_est(i) = sum(w1, r1(i,w1))/n1;
- 147  r2bar_est(i) = sum(w2, r2(i,w2))/n2;
- 148  r3bar_est(i) = sum(w3, r3(i,w3))/n3;
- 149   
- 150  * Sampling - calculate estimated std
- 151  r1std_est(i) = sqrt(sum(w1, sqr(r1(i,w1) - r1bar_est(i)))/(n1-1));
- 152  r2std_est(i) = sqrt(sum(w2, sqr(r2(i,w2) - r2bar_est(i)))/(n2-1));
- 153  r3std_est(i) = sqrt(sum(w3, sqr(r3(i,w3) - r3bar_est(i)))/(n3-1));
- 154   
- 155  * Sampling - std correction
- 156  r1(i, w1) = r1(i, w1)*rstd(i)/r1std_est(i);
- 157  r2(i, w2) = r2(i, w2)*rstd(i)/r1std_est(i);
- 158  r3(i, w3) = r3(i, w3)*rstd(i)/r1std_est(i);
- 159   
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/05/18 20:11:33 Page 4
+ 137  loop(w2,
+ 138          loop(ii,
+ 139                  nv(ii) = normal(0,1);
+ 140          );
+ 141          r2(i, w2) = sum(ii, chol(ii, i) * nv(ii));
+ 142  );
+ 143   
+ 144  loop(w3,
+ 145          loop(ii,
+ 146                  nv(ii) = normal(0,1);
+ 147          );
+ 148          r3(i, w3) = sum(ii, chol(ii, i) * nv(ii));
+ 149  );
+ 150  display r1, r2, r3;
+ 151   
+ 152  r1bar_est(i) = sum(w1, r1(i,w1))/n1;
+ 153  r2bar_est(i) = sum(w2, r2(i,w2))/n2;
+ 154  r3bar_est(i) = sum(w3, r3(i,w3))/n3;
+ 155   
+ 156  * Sampling - mean correction
+ 157  r1(i, w1) = r1(i, w1) - r1bar_est(i);
+ 158  r2(i, w2) = r2(i, w2) - r2bar_est(i);
+ 159  r3(i, w3) = r3(i, w3) - r3bar_est(i);
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
- 160  r1std_est(i) = sqrt(sum(w1, sqr(r1(i,w1)- r1bar_est(i)))/(n1-1));
- 161  r2std_est(i) = sqrt(sum(w2, sqr(r2(i,w2)- r2bar_est(i)))/(n2-1));
- 162  r3std_est(i) = sqrt(sum(w3, sqr(r3(i,w3)- r3bar_est(i)))/(n3-1));
- 163   
- 164  * Sampling - adding true mean
- 165  r1(i, w1) = r1(i, w1) + rbar(i);
- 166  r2(i, w2) = r2(i, w2) + rbar(i);
- 167  r3(i, w3) = r3(i, w3) + rbar(i);
- 168   
- 169  r1bar_est(i) = sum(w1, r1(i,w1))/n1;
- 170  r2bar_est(i) = sum(w2, r2(i,w2))/n2;
- 171  r3bar_est(i) = sum(w3, r3(i,w3))/n3;
- 172   
- 173  display rbar, r1bar_est, r2bar_est, r3bar_est;
- 174  display rstd, r1std_est, r2std_est, r3std_est;
- 175   
- 176  * Sampling - convert to actual return from log
- 177  r1(i, w1) = exp(r1(i, w1));
- 178  r2(i, w2) = exp(r2(i, w2));
- 179  r3(i, w3) = exp(r3(i, w3));
- 180   
- 181  * Stage params
- 182  Positive Variables
- 183          x1(i)           "amount held of assets for stochastic stage 1"
- 184          z1(i)           "amount bought of assets for stochastic stage 1"
- 185          y1(i)           "amount sold of assets for stochastic stage 1"
- 186          x2(i,w1)                "amount held of assets for stochastic stage 2"
- 187          z2(i,w1)                "amount bought of assets for stochastic stage 2"
- 188          y2(i,w1)                "amount sold of assets for stochastic stage 2"
- 189          x3(i,w1,w2)             "amount held of assets for stochastic stage 3"
- 190          z3(i,w1,w2)             "amount bought of assets for stochastic stage 3"
- 191          y3(i,w1,w2)             "amount sold of assets for stochastic stage 3";
- 192   
- 193  x1.lo(i) = 0;
- 194  x2.lo(i,w1) = 0;
- 195  x3.lo(i,w1,w2) = 0;
- 196   
- 197  * Initialization of params
- 198  x1.l(i) = w0/card(i);
- 199  x2.l(i,w1) = w0/card(i);
- 200  x3.l(i,w1,w2) = w0/card(i);
- 201   
- 202  * Cash asset cannot be bought or sold
- 203  z1.up(ci) = 0;
- 204  y1.up(ci) = 0;
- 205  z2.up(ci,w1) = 0;
- 206  y2.up(ci,w1) = 0;
- 207  z3.up(ci,w1,w2) = 0;
- 208  y3.up(ci,w1,w2) = 0;
+ 160   
+ 161  r1bar_est(i) = sum(w1, r1(i,w1))/n1;
+ 162  r2bar_est(i) = sum(w2, r2(i,w2))/n2;
+ 163  r3bar_est(i) = sum(w3, r3(i,w3))/n3;
+ 164   
+ 165  * Sampling - calculate estimated std
+ 166  r1std_est(i) = sqrt(sum(w1, sqr(r1(i,w1) - r1bar_est(i)))/(n1-1));
+ 167  r2std_est(i) = sqrt(sum(w2, sqr(r2(i,w2) - r2bar_est(i)))/(n2-1));
+ 168  r3std_est(i) = sqrt(sum(w3, sqr(r3(i,w3) - r3bar_est(i)))/(n3-1));
+ 169   
+ 170  * Sampling - std correction
+ 171  r1(i, w1) = r1(i, w1)*rstd(i)/r1std_est(i);
+ 172  r2(i, w2) = r2(i, w2)*rstd(i)/r1std_est(i);
+ 173  r3(i, w3) = r3(i, w3)*rstd(i)/r1std_est(i);
+ 174   
+ 175  r1std_est(i) = sqrt(sum(w1, sqr(r1(i,w1)- r1bar_est(i)))/(n1-1));
+ 176  r2std_est(i) = sqrt(sum(w2, sqr(r2(i,w2)- r2bar_est(i)))/(n2-1));
+ 177  r3std_est(i) = sqrt(sum(w3, sqr(r3(i,w3)- r3bar_est(i)))/(n3-1));
+ 178   
+ 179  * Sampling - adding true mean
+ 180  r1(i, w1) = r1(i, w1) + rbar(i);
+ 181  r2(i, w2) = r2(i, w2) + rbar(i);
+ 182  r3(i, w3) = r3(i, w3) + rbar(i);
+ 183   
+ 184  r1bar_est(i) = sum(w1, r1(i,w1))/n1;
+ 185  r2bar_est(i) = sum(w2, r2(i,w2))/n2;
+ 186  r3bar_est(i) = sum(w3, r3(i,w3))/n3;
+ 187   
+ 188  display rbar, r1bar_est, r2bar_est, r3bar_est;
+ 189  display rstd, r1std_est, r2std_est, r3std_est;
+ 190   
+ 191  * Sampling - convert to actual return from log
+ 192  r1(i, w1) = exp(r1(i, w1));
+ 193  r2(i, w2) = exp(r2(i, w2));
+ 194  r3(i, w3) = exp(r3(i, w3));
+ 195   
+ 196  display r1, r2, r3;
+ 197   
+ 198  * Stage params
+ 199  Positive Variables
+ 200          x1(i)           "amount held of assets for stochastic stage 1"
+ 201          z1(i)           "amount bought of assets for stochastic stage 1"
+ 202          y1(i)           "amount sold of assets for stochastic stage 1"
+ 203          x2(i,w1)                "amount held of assets for stochastic stage 2"
+ 204          z2(i,w1)                "amount bought of assets for stochastic stage 2"
+ 205          y2(i,w1)                "amount sold of assets for stochastic stage 2"
+ 206          x3(i,w1,w2)             "amount held of assets for stochastic stage 3"
+ 207          z3(i,w1,w2)             "amount bought of assets for stochastic stage 3"
+ 208          y3(i,w1,w2)             "amount sold of assets for stochastic stage 3";
  209   
- 210  * Definitions for utility
- 211  Scalar
- 212          alpha           "alpha for utility function"    /20/;
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/05/18 20:11:33 Page 5
+ 210  x1.lo(i) = 0;
+ 211  x2.lo(i,w1) = 0;
+ 212  x3.lo(i,w1,w2) = 0;
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 5
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
  213   
- 214  Free Variable
- 215          utility         "utility of investments";
- 216   
- 217  * Constraint equations
- 218  *
- 219  * Removed:
- 220  * termw(w1,w2,w3)       "terminal utility constraints";
- 221  * termw(w1,w2,w3).. -sum(j,r3(j,w3)*x3(j,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= - wtarget + cf4(w1,w2,w3);
- 222  Equations
- 223          objfunc                 "objective function - utility"
- 224          abalance1(ai)   "initial balancing for assets, at stage 1"
- 225          cbalance1(ci)   "initial balancing for cash, at stage 1"
- 226          arebalance2(ai,w1)      "rebalancing for assets, at stage 2"
- 227          crebalance2(ci,w1)      "rebalancing for cash, at stage 2"
- 228          arebalance3(ai,w1,w2)   "rebalancing for assets, at stage 3"
- 229          crebalance3(ci,w1,w2)   "rebalancing for cash, at stage 3";
- 230   
- 231  objfunc..       utility =e= sum((w1,w2,w3),(sum(i,r3(i,w3)*x3(i,w1,w2))**(1-alpha)-1)/(1-alpha))/nall;
+ 214  * Initialization of params
+ 215  x1.l(i) = w0/card(i);
+ 216  x2.l(i,w1) = w0/card(i);
+ 217  x3.l(i,w1,w2) = w0/card(i);
+ 218   
+ 219  * Cash asset cannot be bought or sold
+ 220  z1.up(ci) = 0;
+ 221  y1.up(ci) = 0;
+ 222  z2.up(ci,w1) = 0;
+ 223  y2.up(ci,w1) = 0;
+ 224  z3.up(ci,w1,w2) = 0;
+ 225  y3.up(ci,w1,w2) = 0;
+ 226   
+ 227  display x1.l, y1.l, z1.l;
+ 228   
+ 229  * Definitions for utility
+ 230  Scalar
+ 231          alpha           "alpha for utility function"    /20/;
  232   
- 233  abalance1(ai).. x1(ai) + y1(ai) - z1(ai) =e= x0(ai);
- 234   
- 235  cbalance1(ci).. x1(ci) + sum(ii, (1-strc(ii))*y1(ii) + (1+btrc(ii))*z1(ii)) =e= x0(ci) + cf1;
+ 233  Parameters
+ 234          sup             "upside slope"
+ 235          sdo             "downside slope";
  236   
- 237  arebalance2(ai,w1).. -r1(ai,w1)*x1(ai) + x2(ai,w1) + y2(ai, w1) - z2(ai,w1) =e= 0;
- 238   
- 239  crebalance2(ci,w1).. -r1(ci,w1)*x1(ci) + x2(ci,w1) + sum(ii, - (1-strc(ii))*y2(ii,w1) + (1+btrc(ii))*z2(ii,w1)) =e= cf2(w1);
- 240   
- 241  arebalance3(ai,w1,w2).. -r2(ai,w2)*x2(ai,w1) + x3(ai,w1,w2) + y3(ai,w1,w2) - z3(ai,w1,w2) =e= 0;
- 242   
- 243  crebalance3(ci,w1,w2).. -r2(ci,w2)*x2(ci,w1) + x3(ci,w1,w2) + sum(ii, (1-strc(ii))*y3(ii,w1,w2) + (1+btrc(ii))*z3(ii,w1,w2)) =e= cf3(w1,w2);
- 244   
- 245  * Solve
- 246  *option lp = cplex;
- 247   option mpec=nlpec;
- 248   
- 249  Model endowment /all/;
- 250  Solve endowment using mpec maximizing utility;
- 251   
- 252  display utility.l, x1.l, y1.l, z1.l, x2.l, y2.l, z2.l, x3.l, y3.l, z3.l;
+ 237  sup = 1;
+ 238  sdo = 10;
+ 239   
+ 240  *Positive Variables
+ 241  *       u(w1,w2,w3) "upside wealth"
+ 242  *       v(w1,w2,w3) "downside wealth";
+ 243   
+ 244  Free Variable
+ 245          utility         "utility of investments";
+ 246   
+ 247  * Piecewise Linear:
+ 248  * utility =e= sup*sum((w1,w2,w3),u(w1,w2,w3))/nall - sdo*sum((w1,w2,w3),v(w1,w2,w3))/nall;
+ 249  * termw(w1,w2,w3)       "terminal utility constraints";
+ 250  * termw(w1,w2,w3).. -sum(i,r3(i,w3)*x3(i,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= -wtarget + cf4(w1,w2,w3);
+ 251  *
+ 252  * Power:
+ 253  * utility =e= sum((w1,w2,w3),(sum(i,r3(i,w3)*x3(i,w1,w2))**(1-alpha)-1)/(1-alpha))/nall;
+ 254  *
+ 255  * CVar:
+ 256  *
+ 257  *
+ 258   
+ 259  * Constraint equations
+ 260  Equations
+ 261          objfunc                 "objective function - utility"
+ 262          abalance1(ai)   "initial balancing for assets, at stage 1"
+ 263          cbalance1(ci)   "initial balancing for cash, at stage 1"
+ 264          arebalance2(ai,w1)      "rebalancing for assets, at stage 2"
+ 265          crebalance2(ci,w1)      "rebalancing for cash, at stage 2"
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
 
 
-COMPILATION TIME     =        0.002 SECONDS      3 MB  25.0.2 r65346 DEX-DEG
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/05/18 20:11:33 Page 6
+ 266          arebalance3(ai,w1,w2)   "rebalancing for assets, at stage 3"
+ 267          crebalance3(ci,w1,w2)   "rebalancing for cash, at stage 3";
+ 268   
+ 269  objfunc..       utility =e= sum((w1,w2,w3),(sum(i,r3(i,w3)*x3(i,w1,w2))**(1-alpha)-1)/(1-alpha))/nall;
+ 270   
+ 271  abalance1(ai).. x1(ai) + y1(ai) - z1(ai) =e= x0(ai);
+ 272   
+ 273  cbalance1(ci).. x1(ci) + sum(ii, -(1-strc(ii))*y1(ii) + (1+btrc(ii))*z1(ii)) =e= x0(ci) + cf1;
+ 274   
+ 275  arebalance2(ai,w1).. -r1(ai,w1)*x1(ai) + x2(ai,w1) + y2(ai, w1) - z2(ai,w1) =e= 0;
+ 276   
+ 277  crebalance2(ci,w1).. -r1(ci,w1)*x1(ci) + x2(ci,w1) + sum(ii, -(1-strc(ii))*y2(ii,w1) + (1+btrc(ii))*z2(ii,w1)) =e= cf2(w1);
+ 278   
+ 279  arebalance3(ai,w1,w2).. -r2(ai,w2)*x2(ai,w1) + x3(ai,w1,w2) + y3(ai,w1,w2) - z3(ai,w1,w2) =e= 0;
+ 280   
+ 281  crebalance3(ci,w1,w2).. -r2(ci,w2)*x2(ci,w1) + x3(ci,w1,w2) + sum(ii, -(1-strc(ii))*y3(ii,w1,w2) + (1+btrc(ii))*z3(ii,w1,w2)) =e= cf3(w1,w2);
+ 282   
+ 283  *termw(w1,w2,w3).. -sum(i,r3(i,w3)*x3(i,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= -wtarget + cf4(w1,w2,w3);
+ 284   
+ 285  * Solve
+ 286  *option lp = cplex;
+ 287  option mpec=nlpec;
+ 288   
+ 289  Model endowment /all/;
+ 290  *Solve endowment using lp maximizing utility;
+ 291  Solve endowment using mpec maximizing utility;
+ 292   
+ 293  display utility.l, x1.l, y1.l, z1.l, x2.l, y2.l, z2.l, x3.l, y3.l, z3.l;
+ 294   
+ 295  File results / results.txt /;
+ 296  put results;
+ 297  put "Objective", utility.l /;
+ 298  put "Stage 1 x1 y1 z1 "/;
+ 299  loop(i,
+ 300    put x1.l(i), y1.l(i), z1.l(i)/
+ 301  );
+ 302  put "Stage 2 x2 y2 z2 "/;
+ 303  loop(w1,
+ 304          put "scenario:"/;
+ 305          loop(i,
+ 306                  put x2.l(i, w1), y2.l(i, w1), z2.l(i, w1)/;
+ 307          );
+ 308  );
+ 309  put "Stage 3 x3 y3 z3 "/;
+ 310  loop((w1, w2),
+ 311          put "scenario:"/;
+ 312          loop(i,
+ 313                  put x3.l(i, w1, w2), y3.l(i, w1, w2), z3.l(i, w1, w2)/;
+ 314          );
+ 315  );
+ 316  putclose;
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+
+
+COMPILATION TIME     =        0.003 SECONDS      3 MB  25.0.2 r65346 DEX-DEG
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 8
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
@@ -288,89 +362,148 @@ E x e c u t i o n
 cash 1000000.000
 
 
-----     81 PARAMETER n1                   =        5.000  number of scenarios in stage 1
+----     95 PARAMETER n1                   =        5.000  number of scenarios in stage 1
             PARAMETER n2                   =        5.000  number of scenarios in stage 2
             PARAMETER n3                   =        5.000  number of scenarios in stage 3
 
-----    135 PARAMETER r1  return scenarios at end of stage 1
+----    101 PARAMETER nall                 =      125.000  total number of scenarios
+
+----    150 PARAMETER r1  return scenarios at end of stage 1
 
             w1_01       w1_02       w1_03       w1_04       w1_05
 
-stock      -0.320      -0.991      -0.927      -0.735      -1.176
-cbond      -0.321      -1.279      -1.054      -1.150      -1.282
-gbond       0.635      -0.510      -1.066      -3.908       0.940
-alter      -0.330      -0.958       0.125      -2.162       0.796
-cash       -2.078      -0.462      -1.419      -1.441      -0.086
+stock      -0.048      -0.149      -0.139      -0.110      -0.177
+cbond       0.052      -0.120       0.030      -0.290       0.093
+gbond       0.051       0.020       0.003      -0.165       0.114
+alter      -0.007      -0.006      -0.002      -0.007 -3.95133E-5
+cash       -0.028      -0.045       0.024       0.007      -0.074
 
 
-----    135 PARAMETER r2  return scenarios at end of stage 2
+----    150 PARAMETER r2  return scenarios at end of stage 2
 
             w2_01       w2_02       w2_03       w2_04       w2_05
 
-stock       0.006       2.258      -0.268       1.024      -1.459
-cbond      -0.191       2.609      -0.430       1.090      -1.347
-gbond      -2.312       1.008      -2.050       0.685       2.256
-alter      -1.377      -1.254      -0.049      -0.404       3.345
-cash       -0.230      -1.206       1.525       2.471       1.190
+stock 9.378056E-4       0.339      -0.040       0.154      -0.219
+cbond      -0.199      -0.032      -0.116      -0.108       0.360
+gbond      -0.124      -0.077      -0.090      -0.033       0.213
+alter      -0.003      -0.006       0.006       0.003       0.011
+cash        0.042       0.085       0.011       0.047      -0.006
 
 
-----    135 PARAMETER r3  return scenarios at end of stage 3
+----    150 PARAMETER r3  return scenarios at end of stage 3
 
             w3_01       w3_02       w3_03       w3_04       w3_05
 
-stock       1.293      -0.818       0.072      -0.301      -0.617
-cbond       1.927      -1.099       0.063      -0.590      -0.488
-gbond       2.433      -0.198      -1.915      -3.116       1.027
-alter       2.043      -0.947      -0.430      -2.016       2.330
-cash       -2.674       0.395      -1.786      -1.687       1.093
+stock       0.194      -0.123       0.011      -0.045      -0.093
+cbond       0.414      -0.142      -0.022      -0.239       0.233
+gbond       0.078       0.023      -0.094      -0.148       0.100
+alter       0.003      -0.005      -0.002      -0.008       0.010
+cash        0.054      -0.063       0.009      -0.003      -0.032
 
 
-----    173 PARAMETER rbar  mean returns
+----    188 PARAMETER rbar  mean returns
 
-stock 1.065,    cbond 1.044,    gbond 1.034,    alter 1.088,    cash  1.021
+stock  0.060,    cbond -0.031,    gbond -0.009,    alter  0.054,    cash  -0.003
 
-
-----    173 PARAMETER r1bar_est  estimate for mean return 1
-
-stock 1.065,    cbond 1.044,    gbond 1.034,    alter 1.088,    cash  1.021
-
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/05/18 20:11:33 Page 7
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 9
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-----    173 PARAMETER r2bar_est  estimate for mean return 2
+----    188 PARAMETER r1bar_est  estimate for mean return 1
 
-stock 1.065,    cbond 1.044,    gbond 1.034,    alter 1.088,    cash  1.021
-
-
-----    173 PARAMETER r3bar_est  estimate for mean return 3
-
-stock 1.065,    cbond 1.044,    gbond 1.034,    alter 1.088,    cash  1.021
+stock  0.060,    cbond -0.031,    gbond -0.009,    alter  0.054,    cash  -0.003
 
 
-----    174 PARAMETER rstd  standard deviation of returns
+----    188 PARAMETER r2bar_est  estimate for mean return 2
 
-stock 0.523,    cbond 0.139,    gbond 0.382,    alter 0.128,    cash  0.939
-
-
-----    174 PARAMETER r1std_est  estimate for std dev return 1
-
-stock 0.523,    cbond 0.139,    gbond 0.382,    alter 0.128,    cash  0.940
+stock  0.060,    cbond -0.031,    gbond -0.009,    alter  0.054,    cash  -0.003
 
 
-----    174 PARAMETER r2std_est  estimate for std dev return 2
+----    188 PARAMETER r3bar_est  estimate for mean return 3
 
-stock 2.251,    cbond 0.533,    gbond 0.397,    alter 0.219,    cash  1.700
+stock  0.060,    cbond -0.031,    gbond -0.009,    alter  0.054,    cash  -0.003
 
 
-----    174 PARAMETER r3std_est  estimate for std dev return 3
+----    189 PARAMETER rstd  standard deviation of returns
 
-stock 1.341,    cbond 0.407,    gbond 0.440,    alter 0.217,    cash  1.857
+stock 0.153,    cbond 0.148,    gbond 0.094,    alter 0.048,    cash  0.007
 
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/05/18 20:11:33 Page 8
+
+----    189 PARAMETER r1std_est  estimate for std dev return 1
+
+stock 0.153,    cbond 0.148,    gbond 0.094,    alter 0.048,    cash  0.007
+
+
+----    189 PARAMETER r2std_est  estimate for std dev return 2
+
+stock 0.659,    cbond 0.205,    gbond 0.123,    alter 0.101,    cash  0.007
+
+
+----    189 PARAMETER r3std_est  estimate for std dev return 3
+
+stock 0.393,    cbond 0.252,    gbond 0.098,    alter 0.102,    cash  0.008
+
+
+----    196 PARAMETER r1  return scenarios at end of stage 1
+
+            w1_01       w1_02       w1_03       w1_04       w1_05
+
+stock       1.350       0.985       1.015       1.111       0.903
+cbond       1.064       0.906       1.042       0.773       1.105
+gbond       1.034       1.005       0.990       0.850       1.095
+alter       1.017       1.029       1.098       1.014       1.125
+cash        0.996       0.993       1.006       1.003       0.988
+
+
+----    196 PARAMETER r2  return scenarios at end of stage 2
+
+            w2_01       w2_02       w2_03       w2_04       w2_05
+
+stock       0.920       2.652       0.809       1.485       0.462
+cbond       0.820       0.958       0.885       0.892       1.381
+gbond       0.904       0.943       0.932       0.982       1.226
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 10
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE endowment Using MPEC From line 250
+E x e c u t i o n
+
+
+        196 PARAMETER r2  return scenarios at end of stage 2
+
+            w2_01       w2_02       w2_03       w2_04       w2_05
+
+alter       0.980       0.936       1.110       1.068       1.207
+cash        0.999       1.006       0.993       0.999       0.990
+
+
+----    196 PARAMETER r3  return scenarios at end of stage 3
+
+            w3_01       w3_02       w3_03       w3_04       w3_05
+
+stock       2.021       0.749       1.138       0.955       0.823
+cbond       1.364       0.811       0.908       0.741       1.152
+gbond       1.072       1.019       0.917       0.873       1.093
+alter       1.104       0.987       1.033       0.948       1.228
+cash        1.009       0.987       1.000       0.998       0.993
+
+
+----    227 VARIABLE x1.L  amount held of assets for stochastic stage 1
+
+stock 200000.000,    cbond 200000.000,    gbond 200000.000,    alter 200000.000,    cash  200000.000
+
+
+----    227 VARIABLE y1.L  amount sold of assets for stochastic stage 1
+
+                      ( ALL       0.000 )
+
+
+----    227 VARIABLE z1.L  amount bought of assets for stochastic stage 1
+
+                      ( ALL       0.000 )
+
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 11
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE endowment Using MPEC From line 291
 
 
 MODEL STATISTICS
@@ -382,26 +515,26 @@ DERIVATIVE POOL              20     CONSTANT POOL              43
 CODE LENGTH               1,753
 
 
-GENERATION TIME      =        0.004 SECONDS      4 MB  25.0.2 r65346 DEX-DEG
+GENERATION TIME      =        0.003 SECONDS      4 MB  25.0.2 r65346 DEX-DEG
 
 
-EXECUTION TIME       =        0.006 SECONDS      4 MB  25.0.2 r65346 DEX-DEG
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/05/18 20:11:33 Page 9
+EXECUTION TIME       =        0.005 SECONDS      4 MB  25.0.2 r65346 DEX-DEG
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 12
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE endowment Using MPEC From line 250
+Solution Report     SOLVE endowment Using MPEC From line 291
 
 
                S O L V E      S U M M A R Y
 
      MODEL   endowment           OBJECTIVE  utility
      TYPE    MPEC                DIRECTION  MAXIMIZE
-     SOLVER  NLPEC               FROM LINE  250
+     SOLVER  NLPEC               FROM LINE  291
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      2 Locally Optimal           
 **** OBJECTIVE VALUE                0.0526
 
- RESOURCE USAGE, LIMIT          0.004   1000000.000
+ RESOURCE USAGE, LIMIT          0.014   1000000.000
  ITERATION COUNT, LIMIT         5       1000000
  EVALUATION ERRORS              0             0
 
@@ -444,17 +577,17 @@ CONOPT 3         25.0.2 r65346 Released Jan 31, 2018 DEG x86 64bit/Mac OS X
                    Post-triangular equations:  1
                    Definitional equations:     4
  
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/05/18 20:11:33 Page 10
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 13
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE endowment Using MPEC From line 250
+Solution Report     SOLVE endowment Using MPEC From line 291
 
 
  
  ** Optimal solution. Reduced gradient less than tolerance.
  
  
- CONOPT time Total                            0.004 seconds
-   of which: Function evaluations             0.000 =  0.0%
+ CONOPT time Total                            0.013 seconds
+   of which: Function evaluations             0.001 =  7.7%
              1st Derivative evaluations       0.000 =  0.0%
  
 
@@ -464,101 +597,105 @@ Solution Report     SOLVE endowment Using MPEC From line 250
                              0  UNBOUNDED
                              0  REDEFINED
                              0     ERRORS
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/05/18 20:11:33 Page 11
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 14
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-----    252 VARIABLE utility.L             =        0.053  utility of investments
+----    293 VARIABLE utility.L             =        0.053  utility of investments
 
-----    252 VARIABLE x1.L  amount held of assets for stochastic stage 1
+----    293 VARIABLE x1.L  amount held of assets for stochastic stage 1
 
-stock    599.108,    cbond 968540.356,    gbond  11331.704,    alter  13463.585,    cash    5568.281
+stock 238871.618,    cbond 131089.390,    gbond 214047.690,    alter 200643.247,    cash  200998.418
 
 
-----    252 VARIABLE y1.L  amount sold of assets for stochastic stage 1
+----    293 VARIABLE y1.L  amount sold of assets for stochastic stage 1
 
                       ( ALL       0.000 )
 
 
-----    252 VARIABLE z1.L  amount bought of assets for stochastic stage 1
+----    293 VARIABLE z1.L  amount bought of assets for stochastic stage 1
 
-stock    599.108,    cbond 968540.356,    gbond  11331.704,    alter  13463.585
+stock 238871.618,    cbond 131089.390,    gbond 214047.690,    alter 200643.247
 
 
-----    252 VARIABLE x2.L  amount held of assets for stochastic stage 2
+----    293 VARIABLE x2.L  amount held of assets for stochastic stage 2
 
             w1_01       w1_02       w1_03       w1_04       w1_05
 
-stock    3944.620    1341.960    1487.066    2023.824     996.659
-cbond 3502588.823 2512506.751 2716537.052 2627326.290 2509457.014
-gbond   42169.855   33618.249   30111.383   17157.597   44786.345
-alter   40768.456   37962.662   42936.581   33105.980   46339.432
-cash     4941.100   32359.244   10642.460   10362.651   50143.265
+stock  322575.080  235227.890  242408.704  265305.930  215601.491
+cbond  139423.063  118739.298  136606.201  101278.083  144869.261
+gbond  221249.469  215057.820  211888.055  181879.081  234357.146
+alter  204124.508  206460.675  220360.627  203432.877  225818.272
+cash   200289.759  199631.353  202237.797  201600.179  198575.025
 
 
-----    252 VARIABLE y2.L  amount sold of assets for stochastic stage 2
-
-                      ( ALL       0.000 )
-
-
-----    252 VARIABLE z2.L  amount bought of assets for stochastic stage 2
+----    293 VARIABLE y2.L  amount sold of assets for stochastic stage 2
 
                       ( ALL       0.000 )
 
 
-----    252 VARIABLE x3.L  amount held of assets for stochastic stage 3
+----    293 VARIABLE z2.L  amount bought of assets for stochastic stage 2
+
+                      ( ALL       0.000 )
+
+
+----    293 VARIABLE x3.L  amount held of assets for stochastic stage 3
 
                   w2_01       w2_02       w2_03       w2_04       w2_05
 
-stock.w1_01    7002.152  260248.993    4508.862   35923.469     665.625
-stock.w1_02    2382.132   88536.696    1533.915   12221.162     226.446
-stock.w1_03    2639.712   98110.182    1699.777   13542.639     250.931
-stock.w1_04    3592.519  133523.160    2313.313   18430.869     341.505
-stock.w1_05    1769.183   65755.220    1139.221    9076.522     168.179
-cbond.w1_01 8256218.102 2.181659E+7 7600928.000 1.287976E+7 5528669.447
-cbond.w1_02 5922420.462 1.564966E+7 5452362.203 9239018.677 3965872.104
-cbond.w1_03 6403355.779 1.692050E+7 5895126.030 9989281.244 4287924.207
-cbond.w1_04 6193070.317 1.636484E+7 5701530.773 9661234.404 4147109.272
-cbond.w1_05 5915231.696 1.563066E+7 5445744.004 9227804.150 3961058.240
-gbond.w1_01   76253.170  147112.965   80317.313  137987.557  188315.680
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/05/18 20:11:33 Page 12
+stock.w1_01  296737.603  855515.731  260846.966  479021.254  148955.554
+stock.w1_02  216386.710  623858.361  190214.575  349311.419  108621.227
+stock.w1_03  222992.358  642902.915  196021.264  359974.866  111937.112
+stock.w1_04  244055.572  703629.668  214536.867  393977.052  122510.368
+stock.w1_05  198332.338  571806.312  174343.892  320166.383   99558.340
+cbond.w1_01  114327.582  133611.172  123450.470  124408.968  192481.223
+cbond.w1_02   97366.796  113789.616  105136.280  105952.583  163926.146
+cbond.w1_03  112017.742  130911.732  120956.314  121895.447  188592.390
+cbond.w1_04   83048.515   97056.276   89675.457   90371.719  139819.975
+cbond.w1_05  118793.491  138830.344  128272.741  129268.681  200000.000
+gbond.w1_01  200000.000  208580.690  206218.268  217228.748  271340.637
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 15
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-        252 VARIABLE x3.L  amount held of assets for stochastic stage 3
+        293 VARIABLE x3.L  amount held of assets for stochastic stage 3
 
                   w2_01       w2_02       w2_03       w2_04       w2_05
 
-gbond.w1_02   60789.824  117279.993   64029.801  110005.122  150127.228
-gbond.w1_03   54448.572  105046.005   57350.573   98530.007  134466.801
-gbond.w1_04   31025.033   59855.670   32678.606   56142.826   76619.768
-gbond.w1_05   80984.409  156240.803   85300.717  146549.195  200000.000
-alter.w1_01  102866.467  104314.002  119636.848  114894.269  175955.788
-alter.w1_02   95786.921   97134.833  111403.119  106986.937  163846.038
-alter.w1_03  108337.053  109861.570  125999.307  121004.511  185313.369
-alter.w1_04   83532.602   84708.071   97150.971   93299.765  142884.704
-alter.w1_05  116923.084  118568.424  135985.124  130594.476  200000.000
-cash .w1_01    4390.026    1410.618   33810.402  101494.247   22892.424
-cash .w1_02   28750.262    9238.133  221424.195  664685.434  149922.395
-cash .w1_03    9455.521    3038.281   72823.027  218604.860   49307.180
-cash .w1_04    9206.918    2958.399   70908.380  212857.350   48010.806
-cash .w1_05   44550.855   14315.234  343114.691 1029983.818  232316.872
+gbond.w1_02  194403.016  202743.576  200447.266  211149.619  263747.190
+gbond.w1_03  191537.684  199755.312  197492.847  208037.457  259859.786
+gbond.w1_04  164410.863  171464.656  169522.617  178573.830  223056.741
+gbond.w1_05  211848.775  220937.819  218435.438  230098.222  287415.908
+alter.w1_01  200000.000  191005.053  226585.103  217987.063  246412.545
+alter.w1_02  202288.963  193191.070  229178.327  220481.884  249232.690
+alter.w1_03  215908.054  206197.647  244607.744  235325.813  266012.265
+alter.w1_04  199322.344  190357.874  225817.369  217248.461  245577.630
+alter.w1_05  221255.423  211304.519  250665.915  241154.099  272600.559
+cash .w1_01  200000.000  201585.449  198844.612  200164.700  198200.796
+cash .w1_02  199342.547  200922.784  198190.957  199506.706  197549.257
+cash .w1_03  201945.220  203546.089  200778.595  202111.522  200128.517
+cash .w1_04  201308.524  202904.346  200145.577  201474.302  199497.549
+cash .w1_05  198287.746  199859.622  197142.250  198451.037  196503.945
 
 
-----    252 VARIABLE y3.L  amount sold of assets for stochastic stage 3
-
-                      ( ALL       0.000 )
-
-
-----    252 VARIABLE z3.L  amount bought of assets for stochastic stage 3
+----    293 VARIABLE y3.L  amount sold of assets for stochastic stage 3
 
                       ( ALL       0.000 )
 
 
+----    293 VARIABLE z3.L  amount bought of assets for stochastic stage 3
 
-EXECUTION TIME       =        0.006 SECONDS      3 MB  25.0.2 r65346 DEX-DEG
+                      ( ALL       0.000 )
+
+
+**** REPORT FILE SUMMARY
+
+results /Users/michellezhang/Desktop/endowment_fund/GAMS/results.txt
+
+
+EXECUTION TIME       =        0.005 SECONDS      3 MB  25.0.2 r65346 DEX-DEG
 
 
 USER: MS&E 348  Optimization under Uncertainty       G180131/0001AS-GEN

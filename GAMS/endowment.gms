@@ -14,48 +14,62 @@ Alias (i, ii);
 
 Parameter rbar(i) "mean returns"
 /
-stock	1.0653
-cbond	1.0440
-gbond	1.0336
-alter	1.0880
-cash	1.0214
+stock	0.06044
+cbond	-0.03083
+gbond	-0.00891
+alter	0.054306
+cash	-0.00267
 /;
 
 Parameter rstd(i) "standard deviation of returns"
 /
-stock	0.5233
-cbond	0.1390
-gbond	0.3820
-alter	0.1280
-cash	0.9395
+stock	0.15326
+cbond	0.14756
+gbond	0.09429
+alter	0.04826
+cash	0.00737
 /;
 
 Table chol(i, ii) "covariance matrix of returns"
 	stock	cbond	gbond	alter	cash
-stock	1.020	1.235	0.950	0.102	0.238
-cbond	0.000	0.200	1.392	1.580	0.280
-gbond	0.000	0.000	1.029	0.138	1.000
-alter	0.000	0.000	0.000	0.481	1.390
-cash	0.000	0.000	0.000	0.000	0.021;
+stock	0.15326	0.04216	-0.0074 0.00097	0.03874
+cbond	0.00000	0.20000	0.08114	0.00550	0.00551
+gbond	0.00000	0.00000	0.04746	0.00061	-0.00863
+alter	0.00000	0.00000	0.00000	0.00476	-0.00341
+cash	0.00000	0.00000	0.00000	0.00000	0.02668;
 
 * Model params
 Scalar 
 	w0			"initial funds/wealth"		/1000000/
-	wtarget		"wealth target scale"		/1.5/; 
+	wtarget		"wealth target scale"		/1050000/; 
 
 Parameter 
 	x0(i)	"amount of initial holdings in assets";
 
-x0(ai) = 0.0;
+x0(ai) = 0;
 x0(ci) = w0;
 display x0;
 
-Parameter 
-	strc(i)		"sell transaction cost/asset"
-	btrc(i)		"buy transaction cost/asset";
+Parameter strc(i)	"sell transaction cost/asset"
+/
+stock 	0.030
+cbond 	0.015
+gbond	0.015
+alter	0.01
+cash	0.00
+/;
 
-strc(i) = 0.0005;  
-btrc(i) = 0.0005;
+Parameter btrc(i)	"buy transaction cost/asset"
+/
+stock	0.030
+cbond	0.015
+gbond	0.015
+alter	0.01
+cash	0.00
+/;
+
+*strc(i) = 0.0005;  
+*btrc(i) = 0.0005;
 
 * Settings - define scenarios
 options limrow = 0, limcol = 0;
@@ -84,6 +98,7 @@ Parameter
 	nall	"total number of scenarios";
 
 nall = n1 * n2 * n3;
+display nall;
 
 * Cash flow - define and initializing 
 Parameters
@@ -178,6 +193,8 @@ r1(i, w1) = exp(r1(i, w1));
 r2(i, w2) = exp(r2(i, w2));
 r3(i, w3) = exp(r3(i, w3));
 
+display r1, r2, r3;
+
 * Stage params
 Positive Variables
 	x1(i)		"amount held of assets for stochastic stage 1"
@@ -207,18 +224,39 @@ y2.up(ci,w1) = 0;
 z3.up(ci,w1,w2) = 0;
 y3.up(ci,w1,w2) = 0;
 
+display x1.l, y1.l, z1.l;
+
 * Definitions for utility
 Scalar
 	alpha		"alpha for utility function"	/20/;
 
+Parameters
+	sup		"upside slope"
+	sdo		"downside slope";
+
+sup = 1;
+sdo = 10;
+
+*Positive Variables
+*	u(w1,w2,w3) "upside wealth"
+*	v(w1,w2,w3) "downside wealth";
+
 Free Variable
 	utility		"utility of investments";
 
-* Constraint equations
-*
-* Removed:
+* Piecewise Linear:
+* utility =e= sup*sum((w1,w2,w3),u(w1,w2,w3))/nall - sdo*sum((w1,w2,w3),v(w1,w2,w3))/nall;
 * termw(w1,w2,w3)	"terminal utility constraints";
-* termw(w1,w2,w3).. -sum(j,r3(j,w3)*x3(j,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= - wtarget + cf4(w1,w2,w3);
+* termw(w1,w2,w3).. -sum(i,r3(i,w3)*x3(i,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= -wtarget + cf4(w1,w2,w3);
+*
+* Power:
+* utility =e= sum((w1,w2,w3),(sum(i,r3(i,w3)*x3(i,w1,w2))**(1-alpha)-1)/(1-alpha))/nall;
+*
+* CVar:
+*
+*
+
+* Constraint equations
 Equations
 	objfunc			"objective function - utility"
 	abalance1(ai)	"initial balancing for assets, at stage 1"
@@ -232,21 +270,47 @@ objfunc..	utility =e= sum((w1,w2,w3),(sum(i,r3(i,w3)*x3(i,w1,w2))**(1-alpha)-1)/
 
 abalance1(ai).. x1(ai) + y1(ai) - z1(ai) =e= x0(ai);
 
-cbalance1(ci).. x1(ci) + sum(ii, (1-strc(ii))*y1(ii) + (1+btrc(ii))*z1(ii)) =e= x0(ci) + cf1;
+cbalance1(ci).. x1(ci) + sum(ii, -(1-strc(ii))*y1(ii) + (1+btrc(ii))*z1(ii)) =e= x0(ci) + cf1;
 
 arebalance2(ai,w1).. -r1(ai,w1)*x1(ai) + x2(ai,w1) + y2(ai, w1) - z2(ai,w1) =e= 0;
 
-crebalance2(ci,w1).. -r1(ci,w1)*x1(ci) + x2(ci,w1) + sum(ii, - (1-strc(ii))*y2(ii,w1) + (1+btrc(ii))*z2(ii,w1)) =e= cf2(w1);
+crebalance2(ci,w1).. -r1(ci,w1)*x1(ci) + x2(ci,w1) + sum(ii, -(1-strc(ii))*y2(ii,w1) + (1+btrc(ii))*z2(ii,w1)) =e= cf2(w1);
 
 arebalance3(ai,w1,w2).. -r2(ai,w2)*x2(ai,w1) + x3(ai,w1,w2) + y3(ai,w1,w2) - z3(ai,w1,w2) =e= 0;
 
-crebalance3(ci,w1,w2).. -r2(ci,w2)*x2(ci,w1) + x3(ci,w1,w2) + sum(ii, (1-strc(ii))*y3(ii,w1,w2) + (1+btrc(ii))*z3(ii,w1,w2)) =e= cf3(w1,w2);
+crebalance3(ci,w1,w2).. -r2(ci,w2)*x2(ci,w1) + x3(ci,w1,w2) + sum(ii, -(1-strc(ii))*y3(ii,w1,w2) + (1+btrc(ii))*z3(ii,w1,w2)) =e= cf3(w1,w2);
+
+*termw(w1,w2,w3).. -sum(i,r3(i,w3)*x3(i,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= -wtarget + cf4(w1,w2,w3);
 
 * Solve
 *option lp = cplex;
- option mpec=nlpec;
+option mpec=nlpec;
 
 Model endowment /all/;
+*Solve endowment using lp maximizing utility;
 Solve endowment using mpec maximizing utility;
 
 display utility.l, x1.l, y1.l, z1.l, x2.l, y2.l, z2.l, x3.l, y3.l, z3.l;
+
+File results / results.txt /;
+put results;
+put "Objective", utility.l /;
+put "Stage 1 x1 y1 z1 "/;
+loop(i,
+  put x1.l(i), y1.l(i), z1.l(i)/
+);
+put "Stage 2 x2 y2 z2 "/;
+loop(w1,
+	put "scenario:"/;
+	loop(i, 
+		put x2.l(i, w1), y2.l(i, w1), z2.l(i, w1)/;
+	);
+);
+put "Stage 3 x3 y3 z3 "/;
+loop((w1, w2),
+	put "scenario:"/;
+	loop(i, 
+		put x3.l(i, w1, w2), y3.l(i, w1, w2), z3.l(i, w1, w2)/;
+	);
+);
+putclose;
