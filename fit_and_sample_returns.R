@@ -39,7 +39,6 @@ get_return <- function(symbol, from_date, to_date) {
 returns = c()
 from_date = "2000-01-01"
 to_date = "2018-01-01"
-num_scenarios = 5
 
 # build up vector of returns from assets
 for (i in 1:length(assets)) { 
@@ -62,6 +61,9 @@ df.corrs = cor(df)
 df.mu = 12 * df.mu
 df.Sigma = 12 * df.Sigma
 df.sd = diag(sqrt(df.Sigma))
+
+# compute cholesky fact
+df.chol = chol(df.Sigma)
 
 # output into file
 
