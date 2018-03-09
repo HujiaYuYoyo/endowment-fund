@@ -1,4 +1,4 @@
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 1
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:55:43 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -45,8 +45,8 @@ C o m p i l a t i o n
   40   
   41  * Model params
   42  Scalar
-  43          w0                      "initial funds/wealth"          /1000000/
-  44          wtarget         "wealth target scale"           /1050000/;
+  43          w0                      "initial funds/wealth"          /1.0/
+  44          wtarget         "wealth target scale"           /1.5/;
   45   
   46  Parameter
   47          x0(i)   "amount of initial holdings in assets";
@@ -56,7 +56,7 @@ C o m p i l a t i o n
   51  display x0;
   52   
   53  Parameter strc(i)       "sell transaction cost/asset"
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 2
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:55:43 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -90,9 +90,9 @@ C o m p i l a t i o n
   80  option nlp = minos5;
   81   
   82  Set
-  83          w1      "first stage scenarios"         /w1_01*w1_05/
-  84          w2      "second stage scenarios"        /w2_01*w2_05/
-  85          w3      "third stage scenarios"         /w3_01*w3_05/;
+  83          w1      "first stage scenarios"         /w1_01*w1_20/
+  84          w2      "second stage scenarios"        /w2_01*w2_20/
+  85          w3      "third stage scenarios"         /w3_01*w3_20/;
   86   
   87  Scalars
   88          n1      "number of scenarios in stage 1"
@@ -114,7 +114,7 @@ C o m p i l a t i o n
  104  Parameters
  105          cf1                             "cash flow into 1 from end of stage 0"
  106          cf2(w1)                 "cash flow into 2 from end of stage 1"
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 3
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:55:43 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -172,7 +172,7 @@ C o m p i l a t i o n
  157  r1(i, w1) = r1(i, w1) - r1bar_est(i);
  158  r2(i, w2) = r2(i, w2) - r2bar_est(i);
  159  r3(i, w3) = r3(i, w3) - r3bar_est(i);
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 4
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:55:43 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -230,7 +230,7 @@ C o m p i l a t i o n
  210  x1.lo(i) = 0;
  211  x2.lo(i,w1) = 0;
  212  x3.lo(i,w1,w2) = 0;
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 5
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:55:43 Page 5
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -262,9 +262,9 @@ C o m p i l a t i o n
  237  sup = 1;
  238  sdo = 10;
  239   
- 240  *Positive Variables
- 241  *       u(w1,w2,w3) "upside wealth"
- 242  *       v(w1,w2,w3) "downside wealth";
+ 240  Positive Variables
+ 241          u(w1,w2,w3) "upside wealth"
+ 242          v(w1,w2,w3) "downside wealth";
  243   
  244  Free Variable
  245          utility         "utility of investments";
@@ -288,63 +288,64 @@ C o m p i l a t i o n
  263          cbalance1(ci)   "initial balancing for cash, at stage 1"
  264          arebalance2(ai,w1)      "rebalancing for assets, at stage 2"
  265          crebalance2(ci,w1)      "rebalancing for cash, at stage 2"
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 6
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:55:43 Page 6
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
  266          arebalance3(ai,w1,w2)   "rebalancing for assets, at stage 3"
- 267          crebalance3(ci,w1,w2)   "rebalancing for cash, at stage 3";
- 268   
- 269  objfunc..       utility =e= sum((w1,w2,w3),(sum(i,r3(i,w3)*x3(i,w1,w2))**(1-alpha)-1)/(1-alpha))/nall;
- 270   
- 271  abalance1(ai).. x1(ai) + y1(ai) - z1(ai) =e= x0(ai);
- 272   
- 273  cbalance1(ci).. x1(ci) + sum(ii, -(1-strc(ii))*y1(ii) + (1+btrc(ii))*z1(ii)) =e= x0(ci) + cf1;
- 274   
- 275  arebalance2(ai,w1).. -r1(ai,w1)*x1(ai) + x2(ai,w1) + y2(ai, w1) - z2(ai,w1) =e= 0;
- 276   
- 277  crebalance2(ci,w1).. -r1(ci,w1)*x1(ci) + x2(ci,w1) + sum(ii, -(1-strc(ii))*y2(ii,w1) + (1+btrc(ii))*z2(ii,w1)) =e= cf2(w1);
- 278   
- 279  arebalance3(ai,w1,w2).. -r2(ai,w2)*x2(ai,w1) + x3(ai,w1,w2) + y3(ai,w1,w2) - z3(ai,w1,w2) =e= 0;
- 280   
- 281  crebalance3(ci,w1,w2).. -r2(ci,w2)*x2(ci,w1) + x3(ci,w1,w2) + sum(ii, -(1-strc(ii))*y3(ii,w1,w2) + (1+btrc(ii))*z3(ii,w1,w2)) =e= cf3(w1,w2);
- 282   
- 283  *termw(w1,w2,w3).. -sum(i,r3(i,w3)*x3(i,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= -wtarget + cf4(w1,w2,w3);
- 284   
- 285  * Solve
- 286  *option lp = cplex;
- 287  option mpec=nlpec;
- 288   
- 289  Model endowment /all/;
- 290  *Solve endowment using lp maximizing utility;
- 291  Solve endowment using mpec maximizing utility;
- 292   
- 293  display utility.l, x1.l, y1.l, z1.l, x2.l, y2.l, z2.l, x3.l, y3.l, z3.l;
- 294   
- 295  File results / results.txt /;
- 296  put results;
- 297  put "Objective", utility.l /;
- 298  put "Stage 1 x1 y1 z1 "/;
- 299  loop(i,
- 300    put x1.l(i), y1.l(i), z1.l(i)/
- 301  );
- 302  put "Stage 2 x2 y2 z2 "/;
- 303  loop(w1,
- 304          put "scenario:"/;
- 305          loop(i,
- 306                  put x2.l(i, w1), y2.l(i, w1), z2.l(i, w1)/;
- 307          );
- 308  );
- 309  put "Stage 3 x3 y3 z3 "/;
- 310  loop((w1, w2),
- 311          put "scenario:"/;
- 312          loop(i,
- 313                  put x3.l(i, w1, w2), y3.l(i, w1, w2), z3.l(i, w1, w2)/;
- 314          );
- 315  );
- 316  putclose;
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 7
+ 267          crebalance3(ci,w1,w2)   "rebalancing for cash, at stage 3"
+ 268          termw(w1,w2,w3) "terminal utility constraints";
+ 269   
+ 270  objfunc..       utility =e= sup*sum((w1,w2,w3),u(w1,w2,w3))/nall - sdo*sum((w1,w2,w3),v(w1,w2,w3))/nall;
+ 271   
+ 272  abalance1(ai).. x1(ai) + y1(ai) - z1(ai) =e= x0(ai);
+ 273   
+ 274  cbalance1(ci).. x1(ci) + sum(ii, -(1-strc(ii))*y1(ii) + (1+btrc(ii))*z1(ii)) =e= x0(ci) + cf1;
+ 275   
+ 276  arebalance2(ai,w1).. -r1(ai,w1)*x1(ai) + x2(ai,w1) + y2(ai, w1) - z2(ai,w1) =e= 0;
+ 277   
+ 278  crebalance2(ci,w1).. -r1(ci,w1)*x1(ci) + x2(ci,w1) + sum(ii, -(1-strc(ii))*y2(ii,w1) + (1+btrc(ii))*z2(ii,w1)) =e= cf2(w1);
+ 279   
+ 280  arebalance3(ai,w1,w2).. -r2(ai,w2)*x2(ai,w1) + x3(ai,w1,w2) + y3(ai,w1,w2) - z3(ai,w1,w2) =e= 0;
+ 281   
+ 282  crebalance3(ci,w1,w2).. -r2(ci,w2)*x2(ci,w1) + x3(ci,w1,w2) + sum(ii, -(1-strc(ii))*y3(ii,w1,w2) + (1+btrc(ii))*z3(ii,w1,w2)) =e= cf3(w1,w2);
+ 283   
+ 284  termw(w1,w2,w3).. -sum(i,r3(i,w3)*x3(i,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= -wtarget + cf4(w1,w2,w3);
+ 285   
+ 286  * Solve
+ 287  *option lp = cplex;
+ 288  option mpec=nlpec;
+ 289   
+ 290  Model endowment /all/;
+ 291  *Solve endowment using lp maximizing utility;
+ 292  Solve endowment using mpec maximizing utility;
+ 293   
+ 294  display utility.l, x1.l, y1.l, z1.l, x2.l, y2.l, z2.l, x3.l, y3.l, z3.l;
+ 295   
+ 296  File results / results.txt /;
+ 297  put results;
+ 298  put "Objective", utility.l /;
+ 299  put "Stage 1 x1 y1 z1 "/;
+ 300  loop(i,
+ 301    put x1.l(i), y1.l(i), z1.l(i)/
+ 302  );
+ 303  put "Stage 2 x2 y2 z2 "/;
+ 304  loop(w1,
+ 305          put "scenario:"/;
+ 306          loop(i,
+ 307                  put x2.l(i, w1), y2.l(i, w1), z2.l(i, w1)/;
+ 308          );
+ 309  );
+ 310  put "Stage 3 x3 y3 z3 "/;
+ 311  loop((w1, w2),
+ 312          put "scenario:"/;
+ 313          loop(i,
+ 314                  put x3.l(i, w1, w2), y3.l(i, w1, w2), z3.l(i, w1, w2)/;
+ 315          );
+ 316  );
+ 317  putclose;
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:55:43 Page 7
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -352,60 +353,60 @@ C o m p i l a t i o n
 
 
 COMPILATION TIME     =        0.003 SECONDS      3 MB  25.0.2 r65346 DEX-DEG
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 8
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:55:43 Page 8
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
 ----     51 PARAMETER x0  amount of initial holdings in assets
 
-cash 1000000.000
+cash 1.000
 
 
-----     95 PARAMETER n1                   =        5.000  number of scenarios in stage 1
-            PARAMETER n2                   =        5.000  number of scenarios in stage 2
-            PARAMETER n3                   =        5.000  number of scenarios in stage 3
+----     95 PARAMETER n1                   =       20.000  number of scenarios in stage 1
+            PARAMETER n2                   =       20.000  number of scenarios in stage 2
+            PARAMETER n3                   =       20.000  number of scenarios in stage 3
 
-----    101 PARAMETER nall                 =      125.000  total number of scenarios
+----    101 PARAMETER nall                 =     8000.000  total number of scenarios
 
 ----    150 PARAMETER r1  return scenarios at end of stage 1
 
-            w1_01       w1_02       w1_03       w1_04       w1_05
+            w1_01       w1_02       w1_03       w1_04       w1_05       w1_06       w1_07       w1_08       w1_09       w1_10       w1_11       w1_12       w1_13       w1_14       w1_15       w1_16       w1_17       w1_18       w1_19       w1_20
 
-stock      -0.048      -0.149      -0.139      -0.110      -0.177
-cbond       0.052      -0.120       0.030      -0.290       0.093
-gbond       0.051       0.020       0.003      -0.165       0.114
-alter      -0.007      -0.006      -0.002      -0.007 -3.95133E-5
-cash       -0.028      -0.045       0.024       0.007      -0.074
+stock      -0.048      -0.149      -0.139      -0.110      -0.177 9.378056E-4       0.339      -0.040       0.154      -0.219       0.194      -0.123       0.011      -0.045      -0.093       0.054       0.092      -0.162      -0.110      -0.156
+cbond       0.052      -0.120       0.030      -0.290       0.093      -0.199      -0.032      -0.116      -0.108       0.360       0.414      -0.142      -0.022      -0.239       0.233      -0.112      -0.231      -0.324      -0.063      -0.227
+gbond       0.051       0.020       0.003      -0.165       0.114      -0.124      -0.077      -0.090      -0.033       0.213       0.078       0.023      -0.094      -0.148       0.100      -0.049      -0.142      -0.179      -0.048      -0.056
+alter      -0.007      -0.006      -0.002      -0.007 -3.95133E-5      -0.003      -0.006       0.006       0.003       0.011       0.003      -0.005      -0.002      -0.008       0.010      -0.015      -0.014      -0.014      -0.003      -0.006
+cash       -0.028      -0.045       0.024       0.007      -0.074       0.042       0.085       0.011       0.047      -0.006       0.054      -0.063       0.009      -0.003      -0.032       0.031       0.022      -0.048      -0.036      -0.063
 
 
 ----    150 PARAMETER r2  return scenarios at end of stage 2
 
-            w2_01       w2_02       w2_03       w2_04       w2_05
+            w2_01       w2_02       w2_03       w2_04       w2_05       w2_06       w2_07       w2_08       w2_09       w2_10       w2_11       w2_12       w2_13       w2_14       w2_15       w2_16       w2_17       w2_18       w2_19       w2_20
 
-stock 9.378056E-4       0.339      -0.040       0.154      -0.219
-cbond      -0.199      -0.032      -0.116      -0.108       0.360
-gbond      -0.124      -0.077      -0.090      -0.033       0.213
-alter      -0.003      -0.006       0.006       0.003       0.011
-cash        0.042       0.085       0.011       0.047      -0.006
+stock       0.228       0.011       0.107       0.112      -0.145       0.239       0.050       0.488      -0.059      -0.021      -0.131       0.169       0.044       0.149       0.034       0.053      -0.104      -0.091       0.068      -0.098
+cbond       0.394      -0.192       0.249       0.074       0.076       0.280      -0.095       0.081      -0.099       0.113      -0.492       0.158      -0.227       0.194       0.340       0.227      -0.033       0.168      -0.052      -0.108
+gbond       0.041      -0.058       0.054      -0.006       0.076       0.092      -0.049      -0.044       0.024      -0.023      -0.113       0.028      -0.039       0.055       0.199       0.134      -0.009       0.122      -0.035      -0.066
+alter       0.015      -0.005       0.002      -0.004 -2.90608E-4       0.008       0.004       0.001 -2.99504E-4       0.004      -0.012       0.008      -0.012      -0.004       0.014       0.013 -3.80207E-4       0.007      -0.004       0.003
+cash        0.132      -0.035       0.008       0.031      -0.059       0.034      -0.015       0.133      -0.018      -0.017      -0.114      -0.004       0.044       0.047       0.030       0.019      -0.042      -0.015      -0.032      -0.034
 
 
 ----    150 PARAMETER r3  return scenarios at end of stage 3
 
-            w3_01       w3_02       w3_03       w3_04       w3_05
+            w3_01       w3_02       w3_03       w3_04       w3_05       w3_06       w3_07       w3_08       w3_09       w3_10       w3_11       w3_12       w3_13       w3_14       w3_15       w3_16       w3_17       w3_18       w3_19       w3_20
 
-stock       0.194      -0.123       0.011      -0.045      -0.093
-cbond       0.414      -0.142      -0.022      -0.239       0.233
-gbond       0.078       0.023      -0.094      -0.148       0.100
-alter       0.003      -0.005      -0.002      -0.008       0.010
-cash        0.054      -0.063       0.009      -0.003      -0.032
+stock      -0.175      -0.020      -0.045      -0.014      -0.072       0.048       0.028      -0.136      -0.141       0.147      -0.177      -0.175      -0.135      -0.327      -0.008      -0.255      -0.137       0.003       0.184       0.068
+cbond      -0.070      -0.423      -0.155      -0.154       0.041       0.205      -0.143      -0.262       0.063       0.137      -0.152      -0.004      -0.419      -0.392      -0.029      -0.159      -0.135       0.246       0.279      -0.011
+gbond      -0.015      -0.188      -0.048      -0.071       0.021       0.062       0.010      -0.143       0.057      -0.005       0.003      -0.036      -0.194      -0.096       0.020       0.059      -0.009       0.043       0.144      -0.050
+alter 7.732039E-4      -0.005      -0.005      -0.012      -0.007       0.005       0.006      -0.006       0.015       0.008       0.003      -0.002      -0.011      -0.005      -0.003      -0.002      -0.011       0.009       0.009       0.004
+cash       -0.062       0.018       0.006      -0.047      -0.006       0.054      -0.004      -0.091      -0.013       0.085      -0.067      -0.046      -0.073      -0.136      -0.027      -0.110      -0.037      -0.002      -0.005       0.004
 
 
 ----    188 PARAMETER rbar  mean returns
 
 stock  0.060,    cbond -0.031,    gbond -0.009,    alter  0.054,    cash  -0.003
 
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/06/18 02:28:09 Page 9
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:55:43 Page 9
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
@@ -437,59 +438,59 @@ stock 0.153,    cbond 0.148,    gbond 0.094,    alter 0.048,    cash  0.007
 
 ----    189 PARAMETER r2std_est  estimate for std dev return 2
 
-stock 0.659,    cbond 0.205,    gbond 0.123,    alter 0.101,    cash  0.007
+stock 0.164,    cbond 0.158,    gbond 0.071,    alter 0.051,    cash  0.010
 
 
 ----    189 PARAMETER r3std_est  estimate for std dev return 3
 
-stock 0.393,    cbond 0.252,    gbond 0.098,    alter 0.102,    cash  0.008
+stock 0.140,    cbond 0.150,    gbond 0.077,    alter 0.050,    cash  0.009
 
 
 ----    196 PARAMETER r1  return scenarios at end of stage 1
 
-            w1_01       w1_02       w1_03       w1_04       w1_05
+            w1_01       w1_02       w1_03       w1_04       w1_05       w1_06       w1_07       w1_08       w1_09       w1_10       w1_11       w1_12       w1_13       w1_14       w1_15       w1_16       w1_17       w1_18       w1_19       w1_20
 
-stock       1.350       0.985       1.015       1.111       0.903
-cbond       1.064       0.906       1.042       0.773       1.105
-gbond       1.034       1.005       0.990       0.850       1.095
-alter       1.017       1.029       1.098       1.014       1.125
-cash        0.996       0.993       1.006       1.003       0.988
+stock       1.049       0.941       0.951       0.981       0.914       1.106       1.590       1.058       1.303       0.873       1.361       0.968       1.118       1.052       1.000       1.170       1.220       0.928       0.982       0.934
+cbond       1.046       0.923       1.030       0.815       1.078       0.872       0.984       0.925       0.931       1.308       1.361       0.908       0.991       0.846       1.193       0.928       0.851       0.795       0.962       0.854
+gbond       1.066       1.037       1.021       0.877       1.129       0.911       0.950       0.939       0.989       1.234       1.092       1.039       0.936       0.891       1.115       0.975       0.896       0.867       0.976       0.968
+alter       1.030       1.035       1.066       1.028       1.078       1.058       1.036       1.120       1.100       1.163       1.099       1.045       1.066       1.026       1.153       0.977       0.982       0.983       1.055       1.038
+cash        0.993       0.990       1.002       0.999       0.986       1.005       1.012       1.000       1.006       0.997       1.007       0.987       0.999       0.997       0.993       1.003       1.002       0.990       0.992       0.987
 
 
 ----    196 PARAMETER r2  return scenarios at end of stage 2
 
-            w2_01       w2_02       w2_03       w2_04       w2_05
+            w2_01       w2_02       w2_03       w2_04       w2_05       w2_06       w2_07       w2_08       w2_09       w2_10       w2_11       w2_12       w2_13       w2_14       w2_15       w2_16       w2_17       w2_18       w2_19       w2_20
 
-stock       0.920       2.652       0.809       1.485       0.462
-cbond       0.820       0.958       0.885       0.892       1.381
-gbond       0.904       0.943       0.932       0.982       1.226
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 10
+stock       1.279       1.013       1.123       1.129       0.857       1.294       1.057       1.690       0.939       0.978       0.870       1.201       1.050       1.175       1.038       1.060       0.896       0.908       1.077       0.901
+cbond       1.243       0.812       1.118       0.985       0.986       1.144       0.871       0.990       0.868       1.013       0.653       1.047       0.791       1.074       1.195       1.101       0.911       1.054       0.898       0.863
+gbond       1.011       0.924       1.023       0.969       1.043       1.058       0.932       0.936       0.995       0.954       0.880       0.999       0.940       1.024       1.166       1.099       0.966       1.088       0.944       0.918
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:55:43 Page 10
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
         196 PARAMETER r2  return scenarios at end of stage 2
 
-            w2_01       w2_02       w2_03       w2_04       w2_05
+            w2_01       w2_02       w2_03       w2_04       w2_05       w2_06       w2_07       w2_08       w2_09       w2_10       w2_11       w2_12       w2_13       w2_14       w2_15       w2_16       w2_17       w2_18       w2_19       w2_20
 
-alter       0.980       0.936       1.110       1.068       1.207
-cash        0.999       1.006       0.993       0.999       0.990
+alter       1.152       1.010       1.055       1.016       1.040       1.100       1.072       1.052       1.040       1.071       0.965       1.098       0.962       1.015       1.145       1.136       1.040       1.094       1.014       1.062
+cash        1.019       0.991       0.998       1.002       0.987       1.002       0.994       1.019       0.994       0.994       0.978       0.996       1.004       1.005       1.002       1.000       0.990       0.994       0.991       0.991
 
 
 ----    196 PARAMETER r3  return scenarios at end of stage 3
 
-            w3_01       w3_02       w3_03       w3_04       w3_05
+            w3_01       w3_02       w3_03       w3_04       w3_05       w3_06       w3_07       w3_08       w3_09       w3_10       w3_11       w3_12       w3_13       w3_14       w3_15       w3_16       w3_17       w3_18       w3_19       w3_20
 
-stock       2.021       0.749       1.138       0.955       0.823
-cbond       1.364       0.811       0.908       0.741       1.152
-gbond       1.072       1.019       0.917       0.873       1.093
-alter       1.104       0.987       1.033       0.948       1.228
-cash        1.009       0.987       1.000       0.998       0.993
+stock       0.946       1.117       1.088       1.124       1.057       1.202       1.177       0.986       0.981       1.336       0.944       0.946       0.987       0.804       1.131       0.868       0.985       1.145       1.392       1.228
+cbond       0.974       0.754       0.916       0.917       1.056       1.190       0.924       0.847       1.073       1.133       0.918       1.022       0.756       0.771       1.004       0.913       0.929       1.227       1.256       1.017
+gbond       0.997       0.853       0.968       0.948       1.030       1.069       1.020       0.889       1.064       1.006       1.013       0.978       0.849       0.927       1.029       1.066       1.003       1.051       1.151       0.966
+alter       1.064       1.021       1.027       0.980       1.008       1.098       1.100       1.016       1.170       1.119       1.082       1.046       0.985       1.025       1.038       1.047       0.985       1.121       1.121       1.089
+cash        0.992       1.005       1.003       0.994       1.001       1.011       1.001       0.987       1.000       1.016       0.991       0.994       0.990       0.980       0.998       0.984       0.996       1.002       1.001       1.003
 
 
 ----    227 VARIABLE x1.L  amount held of assets for stochastic stage 1
 
-stock 200000.000,    cbond 200000.000,    gbond 200000.000,    alter 200000.000,    cash  200000.000
+stock 0.200,    cbond 0.200,    gbond 0.200,    alter 0.200,    cash  0.200
 
 
 ----    227 VARIABLE y1.L  amount sold of assets for stochastic stage 1
@@ -501,41 +502,41 @@ stock 200000.000,    cbond 200000.000,    gbond 200000.000,    alter 200000.000,
 
                       ( ALL       0.000 )
 
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 11
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:55:43 Page 11
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE endowment Using MPEC From line 291
+Model Statistics    SOLVE endowment Using MPEC From line 292
 
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS           7     SINGLE EQUATIONS          156
-BLOCKS OF VARIABLES          10     SINGLE VARIABLES          466
-NON ZERO ELEMENTS           989     NON LINEAR N-Z            125
-DERIVATIVE POOL              20     CONSTANT POOL              43
-CODE LENGTH               1,753
+BLOCKS OF EQUATIONS           8     SINGLE EQUATIONS       10,106
+BLOCKS OF VARIABLES          12     SINGLE VARIABLES       22,316
+NON ZERO ELEMENTS        83,784     NON LINEAR N-Z              0
+DERIVATIVE POOL              20     CONSTANT POOL              16
+CODE LENGTH                   0
 
 
-GENERATION TIME      =        0.003 SECONDS      4 MB  25.0.2 r65346 DEX-DEG
+GENERATION TIME      =        0.107 SECONDS     14 MB  25.0.2 r65346 DEX-DEG
 
 
-EXECUTION TIME       =        0.005 SECONDS      4 MB  25.0.2 r65346 DEX-DEG
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 12
+EXECUTION TIME       =        0.110 SECONDS     14 MB  25.0.2 r65346 DEX-DEG
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:55:43 Page 12
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE endowment Using MPEC From line 291
+Solution Report     SOLVE endowment Using MPEC From line 292
 
 
                S O L V E      S U M M A R Y
 
      MODEL   endowment           OBJECTIVE  utility
      TYPE    MPEC                DIRECTION  MAXIMIZE
-     SOLVER  NLPEC               FROM LINE  291
+     SOLVER  NLPEC               FROM LINE  292
 
 **** SOLVER STATUS     1 Normal Completion         
-**** MODEL STATUS      2 Locally Optimal           
-**** OBJECTIVE VALUE                0.0526
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE               -3.2041
 
- RESOURCE USAGE, LIMIT          0.014   1000000.000
- ITERATION COUNT, LIMIT         5       1000000
+ RESOURCE USAGE, LIMIT         18.511   1000000.000
+ ITERATION COUNT, LIMIT       115       1000000
  EVALUATION ERRORS              0             0
 
 NLPEC 1.6        25.0.2 r65346 Released Jan 31, 2018 DEG x86 64bit/Mac OS X   
@@ -568,27 +569,22 @@ CONOPT 3         25.0.2 r65346 Released Jan 31, 2018 DEG x86 64bit/Mac OS X
                     DK-2880 Bagsvaerd, Denmark
  
  
-    The model has 466 variables and 156 constraints
-    with 989 Jacobian elements, 125 of which are nonlinear.
-    The Hessian of the Lagrangian has 125 elements on the diagonal,
-    250 elements below the diagonal, and 125 nonlinear variables.
- 
                    Pre-triangular equations:   0
                    Post-triangular equations:  1
                    Definitional equations:     4
  
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 13
+ 
+ ** Optimal solution. There are no superbasic variables.
+ 
+ 
+ CONOPT time Total                           18.513 seconds
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:55:43 Page 13
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE endowment Using MPEC From line 291
+Solution Report     SOLVE endowment Using MPEC From line 292
 
 
- 
- ** Optimal solution. Reduced gradient less than tolerance.
- 
- 
- CONOPT time Total                            0.013 seconds
-   of which: Function evaluations             0.001 =  7.7%
-             1st Derivative evaluations       0.000 =  0.0%
+   of which: Function evaluations             0.004 =  0.0%
+             1st Derivative evaluations       0.002 =  0.0%
  
 
 
@@ -597,97 +593,132 @@ Solution Report     SOLVE endowment Using MPEC From line 291
                              0  UNBOUNDED
                              0  REDEFINED
                              0     ERRORS
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 14
+                             9  PROJECTED
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:55:43 Page 14
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-----    293 VARIABLE utility.L             =        0.053  utility of investments
+----    294 VARIABLE utility.L             =       -3.204  utility of investments
 
-----    293 VARIABLE x1.L  amount held of assets for stochastic stage 1
+----    294 VARIABLE x1.L  amount held of assets for stochastic stage 1
 
-stock 238871.618,    cbond 131089.390,    gbond 214047.690,    alter 200643.247,    cash  200998.418
-
-
-----    293 VARIABLE y1.L  amount sold of assets for stochastic stage 1
-
-                      ( ALL       0.000 )
+stock 0.424,    alter 0.558
 
 
-----    293 VARIABLE z1.L  amount bought of assets for stochastic stage 1
-
-stock 238871.618,    cbond 131089.390,    gbond 214047.690,    alter 200643.247
-
-
-----    293 VARIABLE x2.L  amount held of assets for stochastic stage 2
-
-            w1_01       w1_02       w1_03       w1_04       w1_05
-
-stock  322575.080  235227.890  242408.704  265305.930  215601.491
-cbond  139423.063  118739.298  136606.201  101278.083  144869.261
-gbond  221249.469  215057.820  211888.055  181879.081  234357.146
-alter  204124.508  206460.675  220360.627  203432.877  225818.272
-cash   200289.759  199631.353  202237.797  201600.179  198575.025
-
-
-----    293 VARIABLE y2.L  amount sold of assets for stochastic stage 2
+----    294 VARIABLE y1.L  amount sold of assets for stochastic stage 1
 
                       ( ALL       0.000 )
 
 
-----    293 VARIABLE z2.L  amount bought of assets for stochastic stage 2
+----    294 VARIABLE z1.L  amount bought of assets for stochastic stage 1
 
-                      ( ALL       0.000 )
+stock 0.424,    alter 0.558
 
 
-----    293 VARIABLE x3.L  amount held of assets for stochastic stage 3
+----    294 VARIABLE x2.L  amount held of assets for stochastic stage 2
 
-                  w2_01       w2_02       w2_03       w2_04       w2_05
+            w1_01       w1_02       w1_03       w1_04       w1_05       w1_06       w1_07       w1_08       w1_09       w1_10       w1_11       w1_12       w1_13       w1_14       w1_15       w1_16       w1_17       w1_18       w1_19       w1_20
 
-stock.w1_01  296737.603  855515.731  260846.966  479021.254  148955.554
-stock.w1_02  216386.710  623858.361  190214.575  349311.419  108621.227
-stock.w1_03  222992.358  642902.915  196021.264  359974.866  111937.112
-stock.w1_04  244055.572  703629.668  214536.867  393977.052  122510.368
-stock.w1_05  198332.338  571806.312  174343.892  320166.383   99558.340
-cbond.w1_01  114327.582  133611.172  123450.470  124408.968  192481.223
-cbond.w1_02   97366.796  113789.616  105136.280  105952.583  163926.146
-cbond.w1_03  112017.742  130911.732  120956.314  121895.447  188592.390
-cbond.w1_04   83048.515   97056.276   89675.457   90371.719  139819.975
-cbond.w1_05  118793.491  138830.344  128272.741  129268.681  200000.000
-gbond.w1_01  200000.000  208580.690  206218.268  217228.748  271340.637
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/06/18 02:28:09 Page 15
+stock       0.444       0.399       0.403       0.416       0.387       0.468       0.544       0.448       0.552       0.370       0.576       0.410       0.473       0.446       0.424       0.496       0.517       0.393       0.416       0.396
+alter       0.575       0.578       0.595       0.574       0.602       0.591       0.703       0.625       0.614       0.649       0.613       0.583       0.595       0.573       0.644       0.545       0.548       0.548       0.589       0.579
+
+
+----    294 VARIABLE y2.L  amount sold of assets for stochastic stage 2
+
+            w1_07
+
+stock       0.130
+
+
+----    294 VARIABLE z2.L  amount bought of assets for stochastic stage 2
+
+            w1_07
+
+alter       0.125
+
+
+----    294 VARIABLE x3.L  amount held of assets for stochastic stage 3
+
+                  w2_01       w2_02       w2_03       w2_04       w2_05       w2_06       w2_07       w2_08       w2_09       w2_10       w2_11       w2_12       w2_13       w2_14       w2_15       w2_16       w2_17       w2_18       w2_19       w2_20
+
+stock.w1_01       0.569       0.450       0.499       0.502       0.381       0.575       0.470       0.751       0.417       0.435       0.387       0.534       0.466       0.522       0.461       0.471       0.398       0.403       0.479       0.401
+stock.w1_02       0.510       0.404       0.448       0.450       0.342       0.516       0.421       0.674       0.375       0.390       0.347       0.479       0.419       0.469       0.414       0.423       0.357       0.362       0.430       0.359
+stock.w1_03       0.515       0.408       0.452       0.455       0.345       0.521       0.426       0.681       0.379       0.394       0.350       0.484       0.423       0.474       0.418       0.427       0.361       0.366       0.434       0.363
+stock.w1_04       0.532       0.421       0.467       0.469       0.356       0.538       0.439       0.702       0.390       0.407       0.362       0.499       0.436       0.488       0.431       0.441       0.372       0.377       0.448       0.375
+stock.w1_05       0.495       0.392       0.435       0.437       0.332       0.501       0.409       0.654       0.364       0.379       0.337       0.465       0.406       0.455       0.402       0.410       0.347       0.351       0.417       0.349
+stock.w1_06       0.599       0.475       0.526       0.529       0.401       0.606       0.495       0.792       0.440       0.458       0.407       0.563       0.492       0.550       0.486       0.497       0.420       0.425       0.505       0.422
+stock.w1_07       0.345       0.551       0.610       0.614       0.466       0.438       0.574       0.899       0.511       0.532       0.473       0.624       0.571       0.639       0.564       0.576       0.487       0.493       0.586       0.490
+stock.w1_08       0.573       0.454       0.503       0.506       0.384       0.580       0.474       0.757       0.421       0.438       0.390       0.538       0.470       0.527       0.465       0.475       0.401       0.407       0.483       0.404
+stock.w1_09       0.706       0.559       0.620       0.623       0.473       0.714       0.583       0.445       0.519       0.540       0.480       0.663       0.579       0.649       0.573       0.585       0.494       0.501       0.595       0.498
+stock.w1_10       0.473       0.375       0.415       0.418       0.317       0.478       0.391       0.625       0.347       0.362       0.322       0.444       0.388       0.435       0.384       0.392       0.331       0.336       0.398       0.333
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:55:43 Page 15
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-        293 VARIABLE x3.L  amount held of assets for stochastic stage 3
+        294 VARIABLE x3.L  amount held of assets for stochastic stage 3
 
-                  w2_01       w2_02       w2_03       w2_04       w2_05
+                  w2_01       w2_02       w2_03       w2_04       w2_05       w2_06       w2_07       w2_08       w2_09       w2_10       w2_11       w2_12       w2_13       w2_14       w2_15       w2_16       w2_17       w2_18       w2_19       w2_20
 
-gbond.w1_02  194403.016  202743.576  200447.266  211149.619  263747.190
-gbond.w1_03  191537.684  199755.312  197492.847  208037.457  259859.786
-gbond.w1_04  164410.863  171464.656  169522.617  178573.830  223056.741
-gbond.w1_05  211848.775  220937.819  218435.438  230098.222  287415.908
-alter.w1_01  200000.000  191005.053  226585.103  217987.063  246412.545
-alter.w1_02  202288.963  193191.070  229178.327  220481.884  249232.690
-alter.w1_03  215908.054  206197.647  244607.744  235325.813  266012.265
-alter.w1_04  199322.344  190357.874  225817.369  217248.461  245577.630
-alter.w1_05  221255.423  211304.519  250665.915  241154.099  272600.559
-cash .w1_01  200000.000  201585.449  198844.612  200164.700  198200.796
-cash .w1_02  199342.547  200922.784  198190.957  199506.706  197549.257
-cash .w1_03  201945.220  203546.089  200778.595  202111.522  200128.517
-cash .w1_04  201308.524  202904.346  200145.577  201474.302  199497.549
-cash .w1_05  198287.746  199859.622  197142.250  198451.037  196503.945
+stock.w1_11       0.462       0.584       0.647       0.651       0.494       0.704       0.609       0.665       0.542       0.564       0.501       0.692       0.605       0.677       0.599       0.611       0.516       0.523       0.621       0.520
+stock.w1_12       0.525       0.416       0.460       0.463       0.351       0.530       0.433       0.693       0.385       0.401       0.357       0.492       0.430       0.482       0.426       0.435       0.367       0.372       0.442       0.370
+stock.w1_13       0.606       0.480       0.532       0.535       0.406       0.612       0.500       0.665       0.445       0.463       0.412       0.569       0.497       0.556       0.492       0.502       0.424       0.430       0.510       0.427
+stock.w1_14       0.570       0.452       0.500       0.503       0.382       0.577       0.471       0.753       0.419       0.436       0.388       0.535       0.468       0.524       0.463       0.473       0.399       0.405       0.480       0.402
+stock.w1_15       0.542       0.429       0.476       0.478       0.363       0.548       0.448       0.716       0.398       0.414       0.368       0.509       0.445       0.498       0.440       0.449       0.379       0.385       0.456       0.382
+stock.w1_16       0.634       0.502       0.557       0.560       0.425       0.641       0.524       0.792       0.466       0.485       0.431       0.595       0.520       0.583       0.515       0.526       0.444       0.450       0.534       0.447
+stock.w1_17       0.661       0.524       0.580       0.583       0.443       0.668       0.546       0.459       0.485       0.506       0.449       0.620       0.542       0.607       0.536       0.548       0.463       0.469       0.557       0.466
+stock.w1_18       0.503       0.398       0.441       0.444       0.337       0.509       0.416       0.665       0.369       0.385       0.342       0.472       0.413       0.462       0.408       0.417       0.352       0.357       0.424       0.354
+stock.w1_19       0.532       0.421       0.467       0.470       0.356       0.538       0.439       0.703       0.391       0.407       0.362       0.499       0.437       0.489       0.432       0.441       0.372       0.378       0.448       0.375
+stock.w1_20       0.506       0.401       0.444       0.447       0.339       0.512       0.418       0.669       0.372       0.387       0.344       0.475       0.415       0.465       0.411       0.420       0.354       0.359       0.426       0.357
+alter.w1_01       0.662       0.581       0.607       0.584       0.598       0.633       0.616       0.605       0.598       0.616       0.555       0.631       0.553       0.584       0.658       0.653       0.598       0.629       0.583       0.610
+alter.w1_02       0.666       0.584       0.610       0.587       0.601       0.636       0.619       0.608       0.601       0.619       0.557       0.634       0.556       0.587       0.662       0.656       0.601       0.632       0.586       0.613
+alter.w1_03       0.686       0.601       0.628       0.605       0.619       0.655       0.638       0.626       0.619       0.638       0.574       0.653       0.573       0.604       0.681       0.676       0.619       0.651       0.603       0.632
+alter.w1_04       0.661       0.580       0.606       0.583       0.597       0.632       0.615       0.604       0.597       0.615       0.554       0.630       0.552       0.583       0.657       0.652       0.597       0.628       0.582       0.609
+alter.w1_05       0.693       0.608       0.635       0.612       0.626       0.662       0.645       0.633       0.626       0.645       0.581       0.661       0.579       0.611       0.689       0.684       0.626       0.658       0.610       0.639
+alter.w1_06       0.681       0.597       0.623       0.600       0.614       0.650       0.633       0.621       0.614       0.633       0.570       0.648       0.568       0.600       0.676       0.671       0.614       0.646       0.599       0.627
+alter.w1_07       1.147       0.711       0.742       0.715       0.732       1.028       0.754       0.759       0.731       0.753       0.679       0.800       0.677       0.714       0.805       0.799       0.731       0.769       0.713       0.747
+alter.w1_08       0.720       0.631       0.659       0.635       0.650       0.688       0.670       0.658       0.650       0.669       0.603       0.686       0.601       0.634       0.715       0.710       0.650       0.684       0.634       0.663
+alter.w1_09       0.708       0.620       0.648       0.624       0.639       0.676       0.658       1.115       0.639       0.658       0.592       0.674       0.591       0.623       0.703       0.697       0.638       0.672       0.623       0.652
+alter.w1_10       0.748       0.656       0.685       0.660       0.675       0.714       0.696       0.683       0.675       0.695       0.626       0.713       0.625       0.659       0.743       0.737       0.675       0.710       0.658       0.689
+alter.w1_11       0.972       0.620       0.647       0.623       0.638       0.715       0.657       0.942       0.638       0.657       0.592       0.673       0.590       0.623       0.702       0.697       0.638       0.671       0.622       0.651
+alter.w1_12       0.672       0.589       0.615       0.593       0.606       0.642       0.625       0.614       0.606       0.625       0.563       0.640       0.561       0.592       0.668       0.662       0.606       0.638       0.591       0.619
+alter.w1_13       0.686       0.601       0.628       0.605       0.619       0.655       0.638       0.756       0.619       0.638       0.574       0.653       0.573       0.604       0.681       0.676       0.619       0.651       0.603       0.632
+alter.w1_14       0.660       0.578       0.604       0.582       0.596       0.630       0.614       0.603       0.596       0.613       0.552       0.629       0.551       0.581       0.656       0.650       0.595       0.626       0.581       0.608
+alter.w1_15       0.742       0.650       0.679       0.654       0.670       0.708       0.690       0.677       0.670       0.690       0.621       0.707       0.619       0.654       0.737       0.731       0.669       0.704       0.653       0.683
+alter.w1_16       0.628       0.551       0.575       0.554       0.567       0.600       0.584       0.618       0.567       0.584       0.526       0.599       0.525       0.554       0.624       0.619       0.567       0.597       0.553       0.579
+alter.w1_17       0.631       0.554       0.578       0.557       0.570       0.603       0.587       0.974       0.570       0.587       0.529       0.602       0.527       0.556       0.627       0.622       0.570       0.600       0.556       0.582
+alter.w1_18       0.632       0.554       0.579       0.557       0.571       0.603       0.588       0.577       0.570       0.588       0.529       0.602       0.528       0.557       0.628       0.623       0.570       0.600       0.556       0.582
+alter.w1_19       0.679       0.595       0.622       0.599       0.613       0.648       0.631       0.620       0.613       0.631       0.568       0.647       0.567       0.598       0.674       0.669       0.612       0.644       0.597       0.625
+alter.w1_20       0.667       0.585       0.611       0.589       0.602       0.637       0.621       0.609       0.602       0.620       0.559       0.636       0.557       0.588       0.663       0.658       0.602       0.634       0.587       0.615
 
 
-----    293 VARIABLE y3.L  amount sold of assets for stochastic stage 3
+----    294 VARIABLE y3.L  amount sold of assets for stochastic stage 3
 
-                      ( ALL       0.000 )
+                  w2_01       w2_06       w2_08       w2_12
+
+stock.w1_07       0.350       0.265       0.019       0.029
+stock.w1_09                               0.488
+stock.w1_11       0.276       0.042       0.309
+stock.w1_13                               0.135
+stock.w1_16                               0.046
+stock.w1_17                               0.414
+
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:55:43 Page 16
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
 
 
-----    293 VARIABLE z3.L  amount bought of assets for stochastic stage 3
+----    294 VARIABLE z3.L  amount bought of assets for stochastic stage 3
 
-                      ( ALL       0.000 )
+                  w2_01       w2_06       w2_08       w2_12
+
+alter.w1_07       0.336       0.254       0.019       0.028
+alter.w1_09                               0.469
+alter.w1_11       0.265       0.040       0.297
+alter.w1_13                               0.130
+alter.w1_16                               0.044
+alter.w1_17                               0.398
 
 
 **** REPORT FILE SUMMARY
@@ -695,7 +726,7 @@ cash .w1_05  198287.746  199859.622  197142.250  198451.037  196503.945
 results /Users/michellezhang/Desktop/endowment_fund/GAMS/results.txt
 
 
-EXECUTION TIME       =        0.005 SECONDS      3 MB  25.0.2 r65346 DEX-DEG
+EXECUTION TIME       =        0.017 SECONDS      5 MB  25.0.2 r65346 DEX-DEG
 
 
 USER: MS&E 348  Optimization under Uncertainty       G180131/0001AS-GEN

@@ -220,3 +220,26 @@ model portfoliomult /all/;
 solve portfoliomult using lp maximizing utility;
 
 display utility.l, x1.l, y1.l, z1.l, x2.l, y2.l, z2.l, x3.l, y3.l, z3.l;
+
+File results / results.txt /;
+put results;
+put "Objective", utility.l /;
+put "Stage 1 x1 y1 z1 "/;
+loop(j,
+  put x1.l(j), y1.l(j), z1.l(j)/
+);
+put "Stage 2 x2 y2 z2 "/;
+loop(w1,
+  put "scenario:"/;
+  loop(j, 
+    put x2.l(j, w1), y2.l(j, w1), z2.l(j, w1)/;
+  );
+);
+put "Stage 3 x3 y3 z3 "/;
+loop((w1, w2),
+  put "scenario:"/;
+  loop(j, 
+    put x3.l(j, w1, w2), y3.l(j, w1, w2), z3.l(j, w1, w2)/;
+  );
+);
+putclose;

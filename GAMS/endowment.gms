@@ -40,8 +40,8 @@ cash	0.00000	0.00000	0.00000	0.00000	0.02668;
 
 * Model params
 Scalar 
-	w0			"initial funds/wealth"		/1000000/
-	wtarget		"wealth target scale"		/1050000/; 
+	w0			"initial funds/wealth"		/1.0/
+	wtarget		"wealth target scale"		/1.5/; 
 
 Parameter 
 	x0(i)	"amount of initial holdings in assets";
@@ -80,9 +80,9 @@ option lp = minos5;
 option nlp = minos5;
 
 Set
-	w1	"first stage scenarios"		/w1_01*w1_05/
-	w2 	"second stage scenarios"	/w2_01*w2_05/
-	w3	"third stage scenarios"		/w3_01*w3_05/;
+	w1	"first stage scenarios"		/w1_01*w1_20/
+	w2 	"second stage scenarios"	/w2_01*w2_20/
+	w3	"third stage scenarios"		/w3_01*w3_20/;
 
 Scalars 
 	n1	"number of scenarios in stage 1"
@@ -237,9 +237,9 @@ Parameters
 sup = 1;
 sdo = 10;
 
-*Positive Variables
-*	u(w1,w2,w3) "upside wealth"
-*	v(w1,w2,w3) "downside wealth";
+Positive Variables
+	u(w1,w2,w3) "upside wealth"
+	v(w1,w2,w3) "downside wealth";
 
 Free Variable
 	utility		"utility of investments";
@@ -264,9 +264,10 @@ Equations
 	arebalance2(ai,w1)	"rebalancing for assets, at stage 2"
 	crebalance2(ci,w1)	"rebalancing for cash, at stage 2"
 	arebalance3(ai,w1,w2)	"rebalancing for assets, at stage 3"
-	crebalance3(ci,w1,w2)	"rebalancing for cash, at stage 3";
+	crebalance3(ci,w1,w2)	"rebalancing for cash, at stage 3"
+	termw(w1,w2,w3)	"terminal utility constraints";
 
-objfunc..	utility =e= sum((w1,w2,w3),(sum(i,r3(i,w3)*x3(i,w1,w2))**(1-alpha)-1)/(1-alpha))/nall;
+objfunc..	utility =e= sup*sum((w1,w2,w3),u(w1,w2,w3))/nall - sdo*sum((w1,w2,w3),v(w1,w2,w3))/nall;
 
 abalance1(ai).. x1(ai) + y1(ai) - z1(ai) =e= x0(ai);
 
@@ -280,15 +281,15 @@ arebalance3(ai,w1,w2).. -r2(ai,w2)*x2(ai,w1) + x3(ai,w1,w2) + y3(ai,w1,w2) - z3(
 
 crebalance3(ci,w1,w2).. -r2(ci,w2)*x2(ci,w1) + x3(ci,w1,w2) + sum(ii, -(1-strc(ii))*y3(ii,w1,w2) + (1+btrc(ii))*z3(ii,w1,w2)) =e= cf3(w1,w2);
 
-*termw(w1,w2,w3).. -sum(i,r3(i,w3)*x3(i,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= -wtarget + cf4(w1,w2,w3);
+termw(w1,w2,w3).. -sum(i,r3(i,w3)*x3(i,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= -wtarget + cf4(w1,w2,w3);
 
 * Solve
-*option lp = cplex;
-option mpec=nlpec;
+option lp = cplex;
+*option mpec=nlpec;
 
 Model endowment /all/;
-*Solve endowment using lp maximizing utility;
-Solve endowment using mpec maximizing utility;
+Solve endowment using lp maximizing utility;
+*Solve endowment using mpec maximizing utility;
 
 display utility.l, x1.l, y1.l, z1.l, x2.l, y2.l, z2.l, x3.l, y3.l, z3.l;
 
