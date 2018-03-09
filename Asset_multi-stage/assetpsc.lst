@@ -1,4 +1,4 @@
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:59:08 Page 1
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 22:17:50 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -56,7 +56,7 @@ INCLUDE    /Users/michellezhang/Desktop/endowment_fund/Asset_multi-stage/assetm.
   51  Table chol(j, jj)
   52                Stocks   CorpBonds   GvmtBonds        Cash
   53  Stocks        15.500       4.689       2.673       0.000
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:59:08 Page 2
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 22:17:50 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -101,226 +101,227 @@ C o m p i l a t i o n
   91  option solprint = off;
   92  option lp = minos5;
   93  option nlp = minos5;
-  94   
-  95  set w1 scenarios /w1_01*w1_20/;
-  96  set w2 scenarios /w2_01*w2_20/;
-  97  set w3 scenarios /w3_01*w3_20/;
-  98  scalars nscen1, nscen2, nscen3;
-  99  nscen1=card(w1);
- 100  nscen2=card(w2);
- 101  nscen3=card(w3);
- 102  display nscen1, nscen2, nscen3;
- 103  parameter nscenall;
- 104  nscenall = nscen1*nscen2*nscen3;
- 105   
+  94  Option Seed=1;
+  95   
+  96  set w1 scenarios /w1_01*w1_20/;
+  97  set w2 scenarios /w2_01*w2_20/;
+  98  set w3 scenarios /w3_01*w3_20/;
+  99  scalars nscen1, nscen2, nscen3;
+ 100  nscen1=card(w1);
+ 101  nscen2=card(w2);
+ 102  nscen3=card(w3);
+ 103  display nscen1, nscen2, nscen3;
+ 104  parameter nscenall;
+ 105  nscenall = nscen1*nscen2*nscen3;
  106   
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:59:08 Page 3
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 22:17:50 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
- 107  * defining cash flow
- 108  parameter cf1              cash flow period 0;
- 109  parameter cf2(w1)          cash flow period 1;
- 110  parameter cf3(w1,w2)       cash flow period 2;
- 111  parameter cf4(w1,w2,w3)    cash flow period 3;
- 112   
- 113  cf1           = 0.0;
- 114  cf2(w1)       = 0.0;
- 115  cf3(w1,w2)    = 0.0;
- 116  cf4(w1,w2,w3) = 0.0;
- 117   
+ 107   
+ 108  * defining cash flow
+ 109  parameter cf1              cash flow period 0;
+ 110  parameter cf2(w1)          cash flow period 1;
+ 111  parameter cf3(w1,w2)       cash flow period 2;
+ 112  parameter cf4(w1,w2,w3)    cash flow period 3;
+ 113   
+ 114  cf1           = 0.0;
+ 115  cf2(w1)       = 0.0;
+ 116  cf3(w1,w2)    = 0.0;
+ 117  cf4(w1,w2,w3) = 0.0;
  118   
  119   
- 120  parameter r1(j, w1) return scenarios at period one;
- 121   
- 122  parameter r2(j, w2) return scenarios at period two;
- 123   
- 124  parameter r3(j, w3) return scenarios at period three;
- 125  parameters r1bar_est(j), r2bar_est(j), r3bar_est(j), r1std_est(j), r2std_est(j), r3std_est(j);
- 126  parameter nv(jj);
- 127   
- 128  * calculating scenarios by sampling;
- 129  loop(w1,
- 130    loop(jj,
- 131    nv(jj) = normal(0,1);
- 132    );
- 133    r1(j, w1) = sum(jj, chol(jj, j) * nv(jj));
- 134  );
- 135   
- 136  loop(w2,
- 137    loop(jj,
- 138    nv(jj) = normal(0,1);
- 139    );
- 140    r2(j, w2) = sum(jj, chol(jj, j) * nv(jj));
- 141  );
- 142   
- 143  loop(w3,
- 144    loop(jj,
- 145    nv(jj) = normal(0,1);
- 146    );
- 147    r3(j, w3) = sum(jj, chol(jj, j) * nv(jj));
- 148  );
- 149   
- 150  display r1, r2, r3;
- 151   
- 152  r1bar_est(j) = sum(w1, r1(j,w1))/nscen1;
- 153  r2bar_est(j) = sum(w2, r2(j,w2))/nscen2;
- 154  r3bar_est(j) = sum(w3, r3(j,w3))/nscen3;
- 155   
- 156  * mean correction
- 157  r1(j, w1) = r1(j, w1) - r1bar_est(j);
- 158  r2(j, w2) = r2(j, w2) - r2bar_est(j);
- 159  r3(j, w3) = r3(j, w3) - r3bar_est(j);
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:59:08 Page 4
+ 120   
+ 121  parameter r1(j, w1) return scenarios at period one;
+ 122   
+ 123  parameter r2(j, w2) return scenarios at period two;
+ 124   
+ 125  parameter r3(j, w3) return scenarios at period three;
+ 126  parameters r1bar_est(j), r2bar_est(j), r3bar_est(j), r1std_est(j), r2std_est(j), r3std_est(j);
+ 127  parameter nv(jj);
+ 128   
+ 129  * calculating scenarios by sampling;
+ 130  loop(w1,
+ 131    loop(jj,
+ 132    nv(jj) = normal(0,1);
+ 133    );
+ 134    r1(j, w1) = sum(jj, chol(jj, j) * nv(jj));
+ 135  );
+ 136   
+ 137  loop(w2,
+ 138    loop(jj,
+ 139    nv(jj) = normal(0,1);
+ 140    );
+ 141    r2(j, w2) = sum(jj, chol(jj, j) * nv(jj));
+ 142  );
+ 143   
+ 144  loop(w3,
+ 145    loop(jj,
+ 146    nv(jj) = normal(0,1);
+ 147    );
+ 148    r3(j, w3) = sum(jj, chol(jj, j) * nv(jj));
+ 149  );
+ 150   
+ 151  display r1, r2, r3;
+ 152   
+ 153  r1bar_est(j) = sum(w1, r1(j,w1))/nscen1;
+ 154  r2bar_est(j) = sum(w2, r2(j,w2))/nscen2;
+ 155  r3bar_est(j) = sum(w3, r3(j,w3))/nscen3;
+ 156   
+ 157  * mean correction
+ 158  r1(j, w1) = r1(j, w1) - r1bar_est(j);
+ 159  r2(j, w2) = r2(j, w2) - r2bar_est(j);
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 22:17:50 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
- 160   
- 161  r1bar_est(j) = sum(w1, r1(j,w1))/nscen1;
- 162  r2bar_est(j) = sum(w2, r2(j,w2))/nscen2;
- 163  r3bar_est(j) = sum(w3, r3(j,w3))/nscen3;
- 164   
+ 160  r3(j, w3) = r3(j, w3) - r3bar_est(j);
+ 161   
+ 162  r1bar_est(j) = sum(w1, r1(j,w1))/nscen1;
+ 163  r2bar_est(j) = sum(w2, r2(j,w2))/nscen2;
+ 164  r3bar_est(j) = sum(w3, r3(j,w3))/nscen3;
  165   
- 166  * calculating estimated std
- 167  r1std_est(j) = sqrt(sum(w1, sqr(r1(j,w1) - r1bar_est(j)))/(nscen1-1));
- 168  r2std_est(j) = sqrt(sum(w2, sqr(r2(j,w2) - r2bar_est(j)))/(nscen2-1));
- 169  r3std_est(j) = sqrt(sum(w3, sqr(r3(j,w3) - r3bar_est(j)))/(nscen3-1));
- 170   
- 171  * std correction
- 172  r1(j, w1) = r1(j, w1) * rstd(j)/r1std_est(j);
- 173  r2(j, w2) = r2(j, w2) * rstd(j)/r2std_est(j);
- 174  r3(j, w3) = r3(j, w3) * rstd(j)/r3std_est(j);
- 175   
- 176  r1std_est(j) = sqrt(sum(w1, sqr(r1(j,w1)- r1bar_est(j)))/(nscen1-1));
- 177  r2std_est(j) = sqrt(sum(w2, sqr(r2(j,w2)- r2bar_est(j)))/(nscen2-1));
- 178  r3std_est(j) = sqrt(sum(w3, sqr(r3(j,w3)- r3bar_est(j)))/(nscen3-1));
- 179   
- 180  * Adding true mean mean
- 181  r1(j, w1) = r1(j, w1) + rbar(j);
- 182  r2(j, w2) = r2(j, w2) + rbar(j);
- 183  r3(j, w3) = r3(j, w3) + rbar(j);
- 184   
- 185  r1bar_est(j) = sum(w1, r1(j,w1))/nscen1;
- 186  r2bar_est(j) = sum(w2, r2(j,w2))/nscen2;
- 187  r3bar_est(j) = sum(w3, r3(j,w3))/nscen3;
- 188   
+ 166   
+ 167  * calculating estimated std
+ 168  r1std_est(j) = sqrt(sum(w1, sqr(r1(j,w1) - r1bar_est(j)))/(nscen1-1));
+ 169  r2std_est(j) = sqrt(sum(w2, sqr(r2(j,w2) - r2bar_est(j)))/(nscen2-1));
+ 170  r3std_est(j) = sqrt(sum(w3, sqr(r3(j,w3) - r3bar_est(j)))/(nscen3-1));
+ 171   
+ 172  * std correction
+ 173  r1(j, w1) = r1(j, w1) * rstd(j)/r1std_est(j);
+ 174  r2(j, w2) = r2(j, w2) * rstd(j)/r2std_est(j);
+ 175  r3(j, w3) = r3(j, w3) * rstd(j)/r3std_est(j);
+ 176   
+ 177  r1std_est(j) = sqrt(sum(w1, sqr(r1(j,w1)- r1bar_est(j)))/(nscen1-1));
+ 178  r2std_est(j) = sqrt(sum(w2, sqr(r2(j,w2)- r2bar_est(j)))/(nscen2-1));
+ 179  r3std_est(j) = sqrt(sum(w3, sqr(r3(j,w3)- r3bar_est(j)))/(nscen3-1));
+ 180   
+ 181  * Adding true mean mean
+ 182  r1(j, w1) = r1(j, w1) + rbar(j);
+ 183  r2(j, w2) = r2(j, w2) + rbar(j);
+ 184  r3(j, w3) = r3(j, w3) + rbar(j);
+ 185   
+ 186  r1bar_est(j) = sum(w1, r1(j,w1))/nscen1;
+ 187  r2bar_est(j) = sum(w2, r2(j,w2))/nscen2;
+ 188  r3bar_est(j) = sum(w3, r3(j,w3))/nscen3;
  189   
- 190  display rbar, r1bar_est, r2bar_est,r3bar_est;
- 191  display rstd, r1std_est, r2std_est, r3std_est;
- 192   
- 193  positive variable x1(j) holding period 1;
- 194  x1.lo(j) = 0;
- 195  x1.l(j) = 1/card(j);
- 196  positive variable z1(j) bought period 1;
- 197  positive variable y1(j) sold   period 1;
- 198  z1.up(j)$(ord(j) = card(j)) = 0;
- 199  y1.up(j)$(ord(j) = card(j)) = 0;
- 200   
+ 190   
+ 191  display rbar, r1bar_est, r2bar_est,r3bar_est;
+ 192  display rstd, r1std_est, r2std_est, r3std_est;
+ 193   
+ 194  positive variable x1(j) holding period 1;
+ 195  x1.lo(j) = 0;
+ 196  x1.l(j) = 1/card(j);
+ 197  positive variable z1(j) bought period 1;
+ 198  positive variable y1(j) sold   period 1;
+ 199  z1.up(j)$(ord(j) = card(j)) = 0;
+ 200  y1.up(j)$(ord(j) = card(j)) = 0;
  201   
- 202  positive variable x2(j,w1) holding period 2;
- 203  x2.lo(j,w1) = 0;
- 204  x2.l(j,w1) = 1/card(j);
- 205  positive variable z2(j,w1) bought period 2;
- 206  positive variable y2(j,w1) sold   period 2;
- 207  z2.up(j,w1)$(ord(j) = card(j)) = 0;
- 208  y2.up(j,w1)$(ord(j) = card(j)) = 0;
- 209   
- 210  positive variable x3(j,w1,w2) holding period 3;
- 211  x3.lo(j,w1,w2) = 0;
- 212  x3.l(j,w1,w2) = 1/card(j);
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:59:08 Page 5
+ 202   
+ 203  positive variable x2(j,w1) holding period 2;
+ 204  x2.lo(j,w1) = 0;
+ 205  x2.l(j,w1) = 1/card(j);
+ 206  positive variable z2(j,w1) bought period 2;
+ 207  positive variable y2(j,w1) sold   period 2;
+ 208  z2.up(j,w1)$(ord(j) = card(j)) = 0;
+ 209  y2.up(j,w1)$(ord(j) = card(j)) = 0;
+ 210   
+ 211  positive variable x3(j,w1,w2) holding period 3;
+ 212  x3.lo(j,w1,w2) = 0;
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 22:17:50 Page 5
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
- 213  positive variable z3(j,w1,w2) bought period 3;
- 214  positive variable y3(j,w1,w2) sold   period 3;
- 215  z3.up(j,w1,w2)$(ord(j) = card(j)) = 0;
- 216  y3.up(j,w1,w2)$(ord(j) = card(j)) = 0;
- 217   
+ 213  x3.l(j,w1,w2) = 1/card(j);
+ 214  positive variable z3(j,w1,w2) bought period 3;
+ 215  positive variable y3(j,w1,w2) sold   period 3;
+ 216  z3.up(j,w1,w2)$(ord(j) = card(j)) = 0;
+ 217  y3.up(j,w1,w2)$(ord(j) = card(j)) = 0;
  218   
- 219  positive variable u(w1,w2,w3) upside wealth;
- 220  positive variable v(w1,w2,w3) downside wealth;
- 221  parameter sup upside slope;
- 222  sup = 1;
- 223  parameter sdo downside slope;
- 224  sdo = 10;
- 225   
+ 219   
+ 220  positive variable u(w1,w2,w3) upside wealth;
+ 221  positive variable v(w1,w2,w3) downside wealth;
+ 222  parameter sup upside slope;
+ 223  sup = 1;
+ 224  parameter sdo downside slope;
+ 225  sdo = 10;
  226   
- 227  free variable utility portfolio utility;
- 228   
- 229  equations
- 230  objfunsc         objective
- 231  ebalance1(j)      rebalancing period 1
- 232  cbalance1(j)      rebalancing period 1
- 233  ebalance2(j,w1)     rebalancing period 2
- 234  cbalance2(j,w1)     rebalancing period 2
- 235  ebalance3(j,w1,w2)  rebalancing period 3
- 236  cbalance3(j,w1,w2)  rebalancing period 3
- 237  termw(w1,w2,w3) terminal utility constraints
- 238  ;
- 239   
- 240  objfunsc..
- 241  utility =e= sup*sum((w1,w2,w3),u(w1,w2,w3))/nscenall - sdo*sum((w1,w2,w3),v(w1,w2,w3))/nscenall;
- 242   
- 243  ebalance1(j)$(ord(j) ne card(j))..
- 244  x1(j) + y1(j) - z1(j) =e= x0(j);
- 245   
- 246  cbalance1(j)$(ord(j) eq card(j))..
- 247  x1(j) + sum(jj, - trc(jj)*y1(jj) + trc(jj)*z1(jj)) =e= x0(j) + cf1;
- 248   
- 249  ebalance2(j, w1)$(ord(j) ne card(j))..
- 250  -r1(j,w1)*x1(j) + x2(j,w1) + y2(j, w1) - z2(j,w1) =e= 0;
- 251   
- 252  cbalance2(j, w1)$(ord(j) eq card(j))..
- 253  -r1(j,w1)*x1(j) + x2(j,w1) + sum(jj, - trc(jj)*y2(jj,w1) + trc(jj)*z2(jj,w1)) =e= cf2(w1);
- 254   
- 255  ebalance3(j, w1,w2)$(ord(j) ne card(j))..
- 256  -r2(j,w2)*x2(j,w1) + x3(j,w1,w2) + y3(j,w1,w2) - z3(j,w1,w2) =e= 0;
- 257   
- 258  cbalance3(j, w1,w2)$(ord(j) eq card(j))..
- 259  -r2(j,w2)*x2(j,w1) + x3(j,w1,w2) + sum(jj, - trc(jj)*y3(jj,w1,w2) + trc(jj)*z3(jj,w1,w2)) =e=  cf3(w1,w2);
- 260   
- 261  termw(w1,w2,w3)..
- 262  -sum(j,r3(j,w3)*x3(j,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= - wtarget + cf4(w1,w2,w3);
- 263   
- 264  option lp = cplex;
- 265   
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:59:08 Page 6
+ 227   
+ 228  free variable utility portfolio utility;
+ 229   
+ 230  equations
+ 231  objfunsc         objective
+ 232  ebalance1(j)      rebalancing period 1
+ 233  cbalance1(j)      rebalancing period 1
+ 234  ebalance2(j,w1)     rebalancing period 2
+ 235  cbalance2(j,w1)     rebalancing period 2
+ 236  ebalance3(j,w1,w2)  rebalancing period 3
+ 237  cbalance3(j,w1,w2)  rebalancing period 3
+ 238  termw(w1,w2,w3) terminal utility constraints
+ 239  ;
+ 240   
+ 241  objfunsc..
+ 242  utility =e= sup*sum((w1,w2,w3),u(w1,w2,w3))/nscenall - sdo*sum((w1,w2,w3),v(w1,w2,w3))/nscenall;
+ 243   
+ 244  ebalance1(j)$(ord(j) ne card(j))..
+ 245  x1(j) + y1(j) - z1(j) =e= x0(j);
+ 246   
+ 247  cbalance1(j)$(ord(j) eq card(j))..
+ 248  x1(j) + sum(jj, - trc(jj)*y1(jj) + trc(jj)*z1(jj)) =e= x0(j) + cf1;
+ 249   
+ 250  ebalance2(j, w1)$(ord(j) ne card(j))..
+ 251  -r1(j,w1)*x1(j) + x2(j,w1) + y2(j, w1) - z2(j,w1) =e= 0;
+ 252   
+ 253  cbalance2(j, w1)$(ord(j) eq card(j))..
+ 254  -r1(j,w1)*x1(j) + x2(j,w1) + sum(jj, - trc(jj)*y2(jj,w1) + trc(jj)*z2(jj,w1)) =e= cf2(w1);
+ 255   
+ 256  ebalance3(j, w1,w2)$(ord(j) ne card(j))..
+ 257  -r2(j,w2)*x2(j,w1) + x3(j,w1,w2) + y3(j,w1,w2) - z3(j,w1,w2) =e= 0;
+ 258   
+ 259  cbalance3(j, w1,w2)$(ord(j) eq card(j))..
+ 260  -r2(j,w2)*x2(j,w1) + x3(j,w1,w2) + sum(jj, - trc(jj)*y3(jj,w1,w2) + trc(jj)*z3(jj,w1,w2)) =e=  cf3(w1,w2);
+ 261   
+ 262  termw(w1,w2,w3)..
+ 263  -sum(j,r3(j,w3)*x3(j,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= - wtarget + cf4(w1,w2,w3);
+ 264   
+ 265  option lp = cplex;
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 22:17:50 Page 6
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
- 266  model portfoliomult /all/;
- 267  solve portfoliomult using lp maximizing utility;
- 268   
- 269  display utility.l, x1.l, y1.l, z1.l, x2.l, y2.l, z2.l, x3.l, y3.l, z3.l;
- 270   
- 271  File results / results.txt /;
- 272  put results;
- 273  put "Objective", utility.l /;
- 274  put "Stage 1 x1 y1 z1 "/;
- 275  loop(j,
- 276    put x1.l(j), y1.l(j), z1.l(j)/
- 277  );
- 278  put "Stage 2 x2 y2 z2 "/;
- 279  loop(w1,
- 280    put "scenario:"/;
- 281    loop(j,
- 282      put x2.l(j, w1), y2.l(j, w1), z2.l(j, w1)/;
- 283    );
- 284  );
- 285  put "Stage 3 x3 y3 z3 "/;
- 286  loop((w1, w2),
- 287    put "scenario:"/;
- 288    loop(j,
- 289      put x3.l(j, w1, w2), y3.l(j, w1, w2), z3.l(j, w1, w2)/;
- 290    );
- 291  );
- 292  putclose;
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:59:08 Page 7
+ 266   
+ 267  model portfoliomult /all/;
+ 268  solve portfoliomult using lp maximizing utility;
+ 269   
+ 270  display utility.l, x1.l, y1.l, z1.l, x2.l, y2.l, z2.l, x3.l, y3.l, z3.l;
+ 271   
+ 272  File results / results.txt /;
+ 273  put results;
+ 274  put "Objective", utility.l /;
+ 275  put "Stage 1 x1 y1 z1 "/;
+ 276  loop(j,
+ 277    put x1.l(j), y1.l(j), z1.l(j)/
+ 278  );
+ 279  put "Stage 2 x2 y2 z2 "/;
+ 280  loop(w1,
+ 281    put "scenario:"/;
+ 282    loop(j,
+ 283      put x2.l(j, w1), y2.l(j, w1), z2.l(j, w1)/;
+ 284    );
+ 285  );
+ 286  put "Stage 3 x3 y3 z3 "/;
+ 287  loop((w1, w2),
+ 288    put "scenario:"/;
+ 289    loop(j,
+ 290      put x3.l(j, w1, w2), y3.l(j, w1, w2), z3.l(j, w1, w2)/;
+ 291    );
+ 292  );
+ 293  putclose;
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 22:17:50 Page 7
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Include File Summary
 
@@ -331,8 +332,8 @@ Include File Summary
      2       10 INCLUDE        1      10  ./Users/michellezhang/Desktop/endowment_fund/Asset_multi-stage/assetm.inc
 
 
-COMPILATION TIME     =        0.006 SECONDS      3 MB  25.0.2 r65346 DEX-DEG
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:59:08 Page 8
+COMPILATION TIME     =        0.003 SECONDS      3 MB  25.0.2 r65346 DEX-DEG
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 22:17:50 Page 8
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
@@ -342,86 +343,86 @@ E x e c u t i o n
 Cash 1.000
 
 
-----    102 PARAMETER nscen1               =       20.000  
+----    103 PARAMETER nscen1               =       20.000  
             PARAMETER nscen2               =       20.000  
             PARAMETER nscen3               =       20.000  
 
-----    150 PARAMETER r1  return scenarios at period one
+----    151 PARAMETER r1  return scenarios at period one
 
                 w1_01       w1_02       w1_03       w1_04       w1_05       w1_06       w1_07       w1_08       w1_09       w1_10       w1_11       w1_12       w1_13       w1_14       w1_15       w1_16       w1_17       w1_18       w1_19       w1_20
 
-Stocks         -0.049      -0.113      -0.118      -0.103      -0.201      -0.179      -0.155       0.103      -0.034      -0.082       0.156       0.131       0.026      -0.193      -0.084       0.011      -0.049      -0.009      -0.030      -0.098
-CorpBonds       0.021      -0.141      -0.036      -0.084      -0.211       0.024      -0.046       0.203      -0.115      -0.138      -0.035      -0.117       0.188      -0.233       0.115      -0.010      -0.047       0.013       0.076      -0.018
-GvmtBonds       0.026      -0.100      -0.039      -0.015      -0.131       0.043      -0.047       0.181      -0.080      -0.051      -0.014      -0.041       0.154      -0.169       0.073      -0.044      -0.054      -0.003       0.041      -0.060
-Cash           -0.002 9.345727E-4 3.438667E-4 -7.20769E-4       0.001 -7.24070E-4 -9.06942E-4 -6.24782E-4 -2.62607E-4 8.262000E-4       0.001 6.733890E-4       0.002 -8.01701E-4 -7.13516E-4 -1.13496E-6      -0.001       0.001 3.509319E-4 4.994995E-4
+Stocks          0.070       0.161       0.098      -0.032      -0.112       0.067      -0.072      -0.347       0.132      -0.175      -0.161      -0.100      -0.066      -0.133      -0.056      -0.065       0.010      -0.273      -0.170      -0.027
+CorpBonds      -0.032       0.196       0.165      -0.050      -0.102       0.071       0.161      -0.076       0.153       0.210      -0.082      -0.021       0.040      -0.102       0.279       0.032       0.066      -0.303       0.063       0.029
+GvmtBonds      -0.022       0.085       0.095      -0.016      -0.083       0.043       0.081      -0.023       0.120       0.135      -0.046      -0.023       0.048      -0.074       0.190      -0.008       0.045      -0.170       0.063       0.012
+Cash           -0.001       0.002 7.413639E-4 3.634007E-4 -7.18086E-4 -2.55467E-4 4.566545E-4       0.001 5.476392E-4 2.560291E-4 -5.87600E-7       0.001 -6.99221E-4       0.001      -0.001 4.518729E-4 -8.37382E-4      -0.002 1.350098E-4       0.002
 
 
-----    150 PARAMETER r2  return scenarios at period two
+----    151 PARAMETER r2  return scenarios at period two
 
                 w2_01       w2_02       w2_03       w2_04       w2_05       w2_06       w2_07       w2_08       w2_09       w2_10       w2_11       w2_12       w2_13       w2_14       w2_15       w2_16       w2_17       w2_18       w2_19       w2_20
 
-Stocks          0.093      -0.035      -0.142      -0.129      -0.143       0.231       0.313       0.010      -0.097       0.034      -0.146      -0.137       0.018      -0.009      -0.041      -0.060       0.059       0.064       0.214       0.086
-CorpBonds      -0.112      -0.126      -0.108      -0.065      -0.018       0.251       0.103      -0.113      -0.132      -0.032       0.019       0.129      -0.111       0.156      -0.010      -0.063       0.003      -0.091       0.085       0.005
-GvmtBonds      -0.094      -0.114      -0.084      -0.052      -0.007       0.128       0.039      -0.063      -0.113      -0.046       0.028       0.115      -0.070       0.091      -0.006      -0.018       0.012      -0.082       0.008       0.017
-Cash           -0.002      -0.002 -1.66166E-4      -0.001 -6.13448E-4       0.001 4.483753E-4       0.001 7.313717E-4 -2.15796E-4 -5.98823E-4 3.496512E-4 -5.43355E-4       0.003 4.236515E-4 3.452404E-4      -0.002      -0.002       0.001      -0.002
+Stocks          0.132      -0.345       0.047       0.039 5.401213E-4       0.081       0.063      -0.177      -0.054      -0.262       0.195       0.027       0.161       0.201      -0.139       0.127       0.127       0.105       0.078      -0.213
+CorpBonds       0.039       0.007      -0.254      -0.164      -0.088       0.150       0.192      -0.106       0.131      -0.092       0.056      -0.022       0.017       0.168      -0.017      -0.061       0.039      -0.082      -0.075      -0.086
+GvmtBonds       0.015       0.032      -0.152      -0.116      -0.061       0.067       0.151      -0.076       0.122      -0.024       0.039      -0.027       0.007       0.115       0.021      -0.030       0.029      -0.087      -0.046      -0.064
+Cash            0.001       0.001 4.414127E-4 4.044247E-4 2.354314E-4 -4.80240E-4      -0.002 -8.11835E-4      -0.001 9.271563E-4 2.514980E-4      -0.001 -8.94170E-4 -8.57036E-4 7.422677E-4 6.152290E-4 7.475471E-4 -3.52348E-4 -7.53757E-5       0.001
 
 
-----    150 PARAMETER r3  return scenarios at period three
+----    151 PARAMETER r3  return scenarios at period three
 
                 w3_01       w3_02       w3_03       w3_04       w3_05       w3_06       w3_07       w3_08       w3_09       w3_10       w3_11       w3_12       w3_13       w3_14       w3_15       w3_16       w3_17       w3_18       w3_19       w3_20
 
-Stocks          0.045       0.266      -0.296       0.217       0.165      -0.105      -0.103       0.068      -0.008      -0.063      -0.177      -0.105       0.208       0.027      -0.116      -0.073       0.020       0.003       0.236      -0.174
-CorpBonds      -0.117       0.187      -0.093       0.158       0.166      -0.034      -0.096       0.068      -0.062      -0.106      -0.066      -0.046       0.210      -0.005      -0.060       0.011       0.040       0.141       0.271      -0.187
-GvmtBonds      -0.056       0.134      -0.049       0.121       0.134      -0.025      -0.042       0.053      -0.081      -0.044      -0.045      -0.071       0.131       0.013      -0.069       0.007       0.047       0.100       0.187      -0.115
-Cash           -0.001 1.407592E-5       0.002 3.473231E-4 4.887681E-4 1.179749E-4 8.392610E-4 -3.55666E-4 -6.38053E-4 -3.43076E-4 5.614638E-4 -4.17398E-4 -7.14167E-4 -9.44865E-5      -0.002      -0.002 -2.78627E-4 -7.54153E-4 -8.88698E-4      -0.002
+Stocks         -0.227      -0.057      -0.102      -0.053       0.021      -0.022       0.077       0.036       0.103       0.107       0.039      -0.158      -0.184      -0.144      -0.013      -0.082       0.039      -0.101       0.044      -0.048
+CorpBonds      -0.139       0.030      -0.046       0.013       0.028      -0.076       0.054      -0.077       0.065       0.035       0.166       0.018      -0.104      -0.014      -0.145 2.702176E-4       0.130      -0.084       0.168       0.034
+GvmtBonds      -0.084       0.031      -0.039       0.002       0.028      -0.059       0.081      -0.022       0.022       0.031       0.113       0.013      -0.045       0.010      -0.080       0.002       0.118      -0.035       0.136       0.044
+Cash      3.892911E-5 6.318492E-4 -9.81157E-4 -3.44457E-4      -0.002       0.003       0.002 5.506499E-5 9.579848E-4 3.563413E-4 1.772562E-5 -6.20061E-4 1.720231E-4 -6.31714E-5 1.960346E-4      -0.001 -6.73236E-4       0.001 -5.67546E-4 1.472977E-4
 
 
-----    190 PARAMETER rbar  mean returns
-
-Stocks    1.105,    CorpBonds 1.085,    GvmtBonds 1.070,    Cash      1.040
-
-
-----    190 PARAMETER r1bar_est  
+----    191 PARAMETER rbar  mean returns
 
 Stocks    1.105,    CorpBonds 1.085,    GvmtBonds 1.070,    Cash      1.040
 
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 21:59:08 Page 9
+
+----    191 PARAMETER r1bar_est  
+
+Stocks    1.105,    CorpBonds 1.085,    GvmtBonds 1.070,    Cash      1.040
+
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                   03/08/18 22:17:50 Page 9
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-----    190 PARAMETER r2bar_est  
+----    191 PARAMETER r2bar_est  
 
 Stocks    1.105,    CorpBonds 1.085,    GvmtBonds 1.070,    Cash      1.040
 
 
-----    190 PARAMETER r3bar_est  
+----    191 PARAMETER r3bar_est  
 
 Stocks    1.105,    CorpBonds 1.085,    GvmtBonds 1.070,    Cash      1.040
 
 
-----    191 PARAMETER rstd  standard deviation of returns
+----    192 PARAMETER rstd  standard deviation of returns
 
 Stocks    0.155,    CorpBonds 0.119,    GvmtBonds 0.082,    Cash      0.001
 
 
-----    191 PARAMETER r1std_est  
+----    192 PARAMETER r1std_est  
 
 Stocks    0.155,    CorpBonds 0.119,    GvmtBonds 0.082,    Cash      0.001
 
 
-----    191 PARAMETER r2std_est  
+----    192 PARAMETER r2std_est  
 
 Stocks    0.155,    CorpBonds 0.119,    GvmtBonds 0.082,    Cash      0.001
 
 
-----    191 PARAMETER r3std_est  
+----    192 PARAMETER r3std_est  
 
 Stocks    0.155,    CorpBonds 0.119,    GvmtBonds 0.082,    Cash      0.001
 
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:59:08 Page 10
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 22:17:50 Page 10
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE portfoliomult Using LP From line 267
+Model Statistics    SOLVE portfoliomult Using LP From line 268
 
 
 MODEL STATISTICS
@@ -431,27 +432,27 @@ BLOCKS OF VARIABLES          12     SINGLE VARIABLES       21,053
 NON ZERO ELEMENTS        73,259
 
 
-GENERATION TIME      =        0.089 SECONDS     13 MB  25.0.2 r65346 DEX-DEG
+GENERATION TIME      =        0.092 SECONDS     13 MB  25.0.2 r65346 DEX-DEG
 
 
-EXECUTION TIME       =        0.093 SECONDS     13 MB  25.0.2 r65346 DEX-DEG
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:59:08 Page 11
+EXECUTION TIME       =        0.095 SECONDS     13 MB  25.0.2 r65346 DEX-DEG
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 22:17:50 Page 11
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE portfoliomult Using LP From line 267
+Solution Report     SOLVE portfoliomult Using LP From line 268
 
 
                S O L V E      S U M M A R Y
 
      MODEL   portfoliomult       OBJECTIVE  utility
      TYPE    LP                  DIRECTION  MAXIMIZE
-     SOLVER  CPLEX               FROM LINE  267
+     SOLVER  CPLEX               FROM LINE  268
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      1 Optimal                   
-**** OBJECTIVE VALUE               -2.0928
+**** OBJECTIVE VALUE               -2.0272
 
- RESOURCE USAGE, LIMIT          2.255   1000000.000
- ITERATION COUNT, LIMIT     22937       1000000
+ RESOURCE USAGE, LIMIT          2.673   1000000.000
+ ITERATION COUNT, LIMIT     25168       1000000
 
 IBM ILOG CPLEX   25.0.2 r65346 Released Jan 31, 2018 DEG x86 64bit/Mac OS X   
 --- GAMS/Cplex licensed for continuous and discrete problems.
@@ -460,231 +461,219 @@ Cplex 12.8.0.0
 Space for names approximately 0.91 Mb
 Use option 'names no' to turn use of names off
 LP status(1): optimal
-Cplex Time: 2.16sec (det. 1741.42 ticks)
+Cplex Time: 2.57sec (det. 2038.97 ticks)
 Optimal solution found.
-Objective :          -2.092803
+Objective :          -2.027154
 
 
 
 **** REPORT SUMMARY :        0     NONOPT
                              0 INFEASIBLE
                              0  UNBOUNDED
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:59:08 Page 12
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 22:17:50 Page 12
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-----    269 VARIABLE utility.L             =       -2.093  portfolio utility
+----    270 VARIABLE utility.L             =       -2.027  portfolio utility
 
-----    269 VARIABLE x1.L  holding period 1
+----    270 VARIABLE x1.L  holding period 1
 
-Stocks    0.858,    CorpBonds 0.142
+Stocks    0.885,    CorpBonds 0.115
 
 
-----    269 VARIABLE y1.L  sold   period 1
+----    270 VARIABLE y1.L  sold   period 1
 
                       ( ALL       0.000 )
 
 
-----    269 VARIABLE z1.L  bought period 1
+----    270 VARIABLE z1.L  bought period 1
 
-Stocks    0.858,    CorpBonds 0.142
-
-
-----    269 VARIABLE x2.L  holding period 2
-
-                w1_01       w1_02       w1_03       w1_04       w1_05       w1_06       w1_07       w1_08       w1_09       w1_10       w1_11       w1_12       w1_13       w1_14       w1_15       w1_16       w1_17       w1_18       w1_19       w1_20
-
-Stocks          0.736       0.903       0.889       0.881       0.883       0.946       0.967       0.625       0.736       0.802       0.210       0.630       0.840       0.890       0.731       0.928       0.770       0.811       0.717       0.817
-CorpBonds       0.380       0.105       0.128       0.149                                                       0.379       0.248                               0.397                   0.352       0.261       0.335       0.356       0.431       0.228
-GvmtBonds                                                                                           0.714                               0.282       0.700
-Cash                                                                                                                                    0.883
+Stocks    0.885,    CorpBonds 0.115
 
 
-----    269 VARIABLE y2.L  sold   period 2
+----    270 VARIABLE x2.L  holding period 2
 
                 w1_01       w1_02       w1_03       w1_04       w1_05       w1_06       w1_07       w1_08       w1_09       w1_10       w1_11       w1_12       w1_13       w1_14       w1_15       w1_16       w1_17       w1_18       w1_19       w1_20
 
-Stocks          0.218                               0.003                                           0.526       0.237       0.109       1.011       0.559       0.211                   0.177       0.104       0.184       0.195       0.262       0.072
-CorpBonds                   0.033       0.025                   0.128       0.162       0.152       0.188                               0.154       0.142                   0.125
+Stocks          0.680       0.287       0.590       0.917       1.037       0.649       0.975       0.793       0.577       1.001       0.988       1.058       0.992       1.015       0.912       0.992       0.664       0.847       0.992       0.895
+CorpBonds       0.082                               0.210                   0.020       0.130                                                                   0.108                   0.221       0.108       0.518                               0.245
+GvmtBonds       0.473       0.223       0.661                               0.573                               0.439
+Cash                        0.843       0.034                                                                   0.303
 
 
-----    269 VARIABLE z2.L  bought period 2
+----    270 VARIABLE y2.L  sold   period 2
 
                 w1_01       w1_02       w1_03       w1_04       w1_05       w1_06       w1_07       w1_08       w1_09       w1_10       w1_11       w1_12       w1_13       w1_14       w1_15       w1_16       w1_17       w1_18       w1_19       w1_20
 
-Stocks                      0.033       0.025                   0.128       0.162       0.152                                                                               0.125
-CorpBonds       0.218                               0.003                                                       0.237       0.109                               0.211                   0.177       0.104       0.184       0.195       0.262       0.072
-GvmtBonds                                                                                           0.714                               0.282       0.700
+Stocks          0.438       0.926       0.558       0.093                   0.465                               0.606                                                                   0.073                   0.390                               0.121
+CorpBonds       0.036       0.141       0.137                   0.111       0.108       0.007       0.113       0.136       0.142       0.113       0.119       0.017       0.111                   0.016                   0.091       0.127
 
 
-----    269 VARIABLE x3.L  holding period 3
+----    270 VARIABLE z2.L  bought period 2
+
+                w1_01       w1_02       w1_03       w1_04       w1_05       w1_06       w1_07       w1_08       w1_09       w1_10       w1_11       w1_12       w1_13       w1_14       w1_15       w1_16       w1_17       w1_18       w1_19       w1_20
+
+Stocks                                                          0.111                   0.007       0.113                   0.142       0.113       0.119       0.017       0.111                   0.016                   0.091       0.127
+CorpBonds                                           0.093                                                                                                                               0.073                   0.390                               0.121
+GvmtBonds       0.473       0.223       0.661                               0.573                               0.439
+
+
+----    270 VARIABLE x3.L  holding period 3
 
                       w2_01       w2_02       w2_03       w2_04       w2_05       w2_06       w2_07       w2_08       w2_09       w2_10       w2_11       w2_12       w2_13       w2_14       w2_15       w2_16       w2_17       w2_18       w2_19       w2_20
 
-Stocks   .w1_01       1.256       1.140       1.055       1.084       1.092       0.309       0.338       1.184       1.084       1.238       1.105       1.159       1.191       1.280       1.183       1.144       1.274       1.239       0.012       1.139
-Stocks   .w1_02       1.189       1.052       0.941       0.960       0.951       0.524       0.028       1.101       0.985       1.135       0.951       0.974       1.109       1.112       1.059       1.032       1.166       1.160       0.822       1.195
-Stocks   .w1_03       1.195       1.060       0.951       0.971       0.963       0.418       0.061       1.109       0.994       1.144       0.964       0.990       1.117       1.127       1.070       1.042       1.176       1.167       0.748       1.204
-Stocks   .w1_04       1.205       1.071       0.964       0.984       0.978       0.280       0.106       1.120       1.006       1.157       0.980       1.008       1.128       1.144       1.084       1.055       1.189       1.178       0.639       1.217
-Stocks   .w1_05       1.062       0.930       0.819       0.833       0.819       1.204       1.215       0.977       0.866       1.000       0.815       0.825       0.984       0.957       0.924       0.904       1.027       1.031       1.186       1.055
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:59:08 Page 13
+Stocks   .w1_01 5.041566E-4       1.129       0.930       0.820       0.775       0.001       0.006       1.046       0.371       1.149       0.010       0.548       0.002       0.019       1.048       0.191 6.998673E-5       0.443       0.430       1.163
+Stocks   .w1_02       0.005       0.574       0.185       0.152       0.142       0.004       0.007       0.455 8.576754E-5       0.515       0.009       0.064       0.006       0.013       0.257       0.003       0.005       0.001                   0.487
+Stocks   .w1_03       0.006       1.157       0.725       0.614       0.526       0.007       0.016       1.178 8.576754E-5       1.223       0.016       0.308       0.008       0.026       0.671                   0.007       0.280       0.210       1.225
+Stocks   .w1_04       0.458       0.925       1.223       1.194       1.216       0.586       0.623       1.052       1.183       0.978       0.111       1.076       0.335       0.001       1.106       0.608       0.483       0.745       0.879       1.024
+Stocks   .w1_05       0.985       0.784       1.002       1.079       1.136       1.218       0.923       0.955       1.080       0.868       0.617       1.164       0.815       0.578       0.994       1.014       1.013       1.140       1.208       0.919
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 22:17:50 Page 13
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-        269 VARIABLE x3.L  holding period 3
+        270 VARIABLE x3.L  holding period 3
 
                       w2_01       w2_02       w2_03       w2_04       w2_05       w2_06       w2_07       w2_08       w2_09       w2_10       w2_11       w2_12       w2_13       w2_14       w2_15       w2_16       w2_17       w2_18       w2_19       w2_20
 
-Stocks   .w1_06       1.139       0.997       0.878       0.893       0.878       1.200       0.478       1.047       0.928       1.073       0.873       0.884       1.055       1.026       0.990       0.969       1.101       1.106       1.272       1.131
-Stocks   .w1_07       1.164       1.019       0.898       0.913       0.897       0.972       0.235       1.070       0.949       1.096       0.893       0.904       1.079       1.048       1.012       0.991       1.125       1.130       1.127       1.156
-Stocks   .w1_08       0.058       0.784       1.211       0.931       0.720       1.163       1.095       0.195       1.139       0.040       0.518       0.065       0.194       0.318       0.124       0.308       0.268       0.009       0.617       0.349
-Stocks   .w1_09       1.255       1.139       1.054       1.084       1.092       0.307       0.336       1.183       1.083       1.237       1.104       1.158       1.191       1.279       1.183       1.144       1.274       1.238       0.009       1.144
-Stocks   .w1_10       1.206       1.082       0.987       1.011       1.011       0.058       0.120       1.128       1.022       1.172       1.017       1.057       1.136       1.184       1.108       1.076       1.206       1.184       0.548       1.232
-Stocks   .w1_11       0.030       0.269       0.394       0.292       0.202       0.399       0.369       0.038       0.375       0.037       0.121       0.075       0.049       0.162       0.010       0.063       0.122       0.012       0.252       0.149
-Stocks   .w1_12       0.002       0.856       1.280       1.014       0.810       1.098       1.040       0.271       1.213       0.030       0.612       0.012       0.269       0.276       0.209       0.393       0.232       0.078       0.591       0.313
-Stocks   .w1_13       0.348       1.266       1.169       1.201       1.208       0.930       1.017       0.998       1.203       0.534       1.220       1.278       0.933       0.212       1.038       1.269       0.215       0.506       0.561       0.010
-Stocks   .w1_14       1.071       0.938       0.826       0.840       0.825       1.214       1.132       0.985       0.873       1.009       0.821       0.831       0.992       0.964       0.931       0.911       1.035       1.040       1.196       1.063
-Stocks   .w1_15       1.222       1.107       1.023       1.051       1.057       0.155       0.197       1.151       1.052       1.203       1.069       1.120       1.158       1.239       1.148       1.110       1.238       1.205       0.320       1.262
-Stocks   .w1_16       0.565       1.228       1.117       1.144       1.142       0.620       0.808       1.281       1.159       0.895       1.149       1.191       1.212       0.831       1.255       1.219       0.596       0.772       0.418       0.358
-Stocks   .w1_17       1.254       1.133       1.043       1.071       1.076       0.260       0.324       1.178       1.075       1.229       1.086       1.136       1.186       1.261       1.171       1.134       1.265       1.235       0.058       1.204
-Stocks   .w1_18       0.950       1.195       1.101       1.130       1.136       0.541       0.594       1.243       1.134       1.149       1.147       1.199       1.251       0.883       1.235       1.196       0.849       1.108       0.266       0.639
-Stocks   .w1_19       1.268       1.168       1.087       1.119       1.130       0.460       0.454       1.212       1.114       1.271       1.144       1.205       1.220       0.935       1.219       1.177       1.061       1.268       0.140       0.873
-Stocks   .w1_20       1.206       1.080       0.982       1.006       1.004       0.103       0.117       1.126       1.019       1.169       1.010       1.047       1.134       1.176       1.103       1.072       1.202       1.183       0.567       1.229
-CorpBonds.w1_08                                                                   0.572       0.628                                                                                                                                           0.544
-CorpBonds.w1_12                                                                   0.625       0.673                                                                                                                                           0.387
-CorpBonds.w1_13                                                                   0.764       0.692                                                                                                                                           0.207
-CorpBonds.w1_16                                                                   0.567       0.863
-CorpBonds.w1_18                                                                   0.089       0.406
-GvmtBonds.w1_01                                                                   0.582       0.645
-GvmtBonds.w1_03                                                                               0.030
-GvmtBonds.w1_04                                                                               0.130
-GvmtBonds.w1_08       0.023                                                                                                                               0.040                   0.600                               0.489                   0.463       0.669
-GvmtBonds.w1_09                                                                   0.576       0.640
-GvmtBonds.w1_10                                                                               0.162
-GvmtBonds.w1_11                                                                   0.780       0.714                                                       0.061                   0.255                               0.165                   0.455       0.225
-GvmtBonds.w1_12                                                                                                                                                                   0.508                               0.409                   0.637       0.589
-GvmtBonds.w1_13                                                                                                                                                                                                                               0.836
-GvmtBonds.w1_15                                                                   0.239       0.332
-GvmtBonds.w1_16                                                                   0.439                                                                                                                                                       0.822
-GvmtBonds.w1_17                                                                   0.471       0.615
-GvmtBonds.w1_18                                                                   0.965       0.616                                                                                                                                           0.486
-GvmtBonds.w1_19                                                                   0.917       0.902                                                                                                                                           0.206
-GvmtBonds.w1_20                                                                               0.154
-Cash     .w1_01                                                                   0.636       0.553                                                                                                                                           1.430       0.159
-Cash     .w1_02                                                                   0.852       1.418                                                                                                                                           0.516
-Cash     .w1_03                                                                   0.972       1.363                                                                                                                                           0.600
-Cash     .w1_04                                                                   1.127       1.231                                                                                                                                           0.723
-Cash     .w1_05                                                                               0.074
-Cash     .w1_06                                                                   0.092       0.904
-Cash     .w1_07                                                                   0.348       1.178                                                                                                                                           0.173
-Cash     .w1_08       1.372       0.559       0.078       0.394       0.631                               1.222       0.160       1.409       0.859       1.350       1.224       0.611       1.303       1.095       0.758       1.432                   0.521
-Cash     .w1_09                                                                   0.644       0.559                                                                                                                                           1.432       0.154
-Cash     .w1_10                                                                   1.376       1.190                                                                                                                                           0.825
-Cash     .w1_11       1.416       1.139       0.999       1.113       1.215       0.374       0.462       1.399       1.020       1.411       1.306       1.322       1.387       1.066       1.433       1.371       1.185       1.430       0.803       1.106
-Cash     .w1_12       1.443       0.479                   0.301       0.531                               1.137       0.077       1.409       0.753       1.430       1.140       0.732       1.207       1.000       0.863       1.354                   0.626
-Cash     .w1_13       1.051                                                                               0.318                   0.841                               0.391       1.204       0.273                   1.200       0.872                   1.433
-Cash     .w1_14                                                                               0.167
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:59:08 Page 14
+Stocks   .w1_06                   1.147       0.904       0.805       0.749                   0.007       0.965       0.309       1.162       0.010       0.531       0.002       0.019       0.976       0.178 3.900097E-4       0.453       0.413       1.094
+Stocks   .w1_07       0.569       0.881       1.223       1.226       0.911       0.765       0.829       1.027       1.067       0.947       0.209       1.193       0.426       0.087       1.076       0.673       0.595       0.808       0.954       0.995
+Stocks   .w1_08       0.972       0.599       0.906       0.899       0.869       0.932       0.918       0.730       0.826       0.664       1.021       0.890       0.994       1.026       0.760       0.968       0.968       0.951       0.929       0.703
+Stocks   .w1_09       0.010       1.173       0.371       0.307       0.289       0.009       0.014       0.909 8.576754E-5       1.047       0.019       0.119       0.012       0.026       0.530       0.006       0.011       0.004                   0.990
+Stocks   .w1_10       1.227       0.757       1.144       1.135       1.097       1.067       1.159       0.923       1.043       0.839       0.879       1.124       1.070       0.842       0.960       1.222       1.222       0.932       1.090       0.887
+Stocks   .w1_11       1.113       0.747       1.128       1.120       1.083       1.161       1.144       0.910       1.029       0.827       0.978       1.109       1.167       0.942       0.947       1.023       1.026       0.997       1.158       0.875
+Stocks   .w1_12       0.837       0.800       1.074       0.897       1.160       1.142       1.225       0.975       1.102       0.886       0.461       0.976       0.663       0.421       1.015       0.866       0.865       0.994       1.159       0.937
+Stocks   .w1_13       0.596       0.869       1.223       1.225       0.903       0.812       0.882       1.021       1.151       0.939       0.232       1.222       0.448       0.125       1.068       0.687       0.622       0.821       0.971       0.988
+Stocks   .w1_14       1.142       0.767       1.159       1.150       1.112       0.936       1.084       0.935       1.057       0.850       0.782       1.138       0.976       0.744       0.973       1.170       1.169       1.217       0.959       0.899
+Stocks   .w1_15       0.419       0.934       1.226       1.166       1.222       0.537       0.571       1.059       1.223       0.986       0.073       1.038       0.298       0.003       1.113       0.576       0.443       0.713       0.846       1.031
+Stocks   .w1_16       0.595       0.869       1.223       1.225       0.902       0.810       0.881       1.021       1.149       0.939       0.232       1.221       0.447       0.123       1.068       0.687       0.622       0.821       0.970       0.988
+Stocks   .w1_17       0.224       1.074       0.945       1.199       1.106       0.077       0.001       1.124       0.639       1.075       0.001       0.803       0.183       0.013       0.902       0.551       0.242       0.694       0.777       1.111
+Stocks   .w1_18       1.038       0.640       0.968       0.960       0.929       0.996       0.981       0.781       0.883       0.710       1.091       0.951       1.063       1.096       0.813       1.034       1.034       1.016       0.993       0.751
+Stocks   .w1_19       1.212       0.750       1.133       1.124       1.087       1.160       1.149       0.914       1.034       0.831       0.947       1.113       1.137       0.910       0.951       1.121       1.124       0.954       1.163       0.879
+Stocks   .w1_20       0.387       0.947       1.226       1.154       1.227       0.484       0.511       1.066       1.193       0.995       0.044       1.004       0.272       0.004       1.122       0.557       0.411       0.696       0.825       1.040
+CorpBonds.w1_01       0.004                                                       0.007       0.240       0.133                               0.396                   0.102       0.756                               0.028
+CorpBonds.w1_02       0.216                         2.563462E-4 4.930537E-4       0.189       0.283                   0.004                   0.377       0.002       0.250       0.507                   0.131       0.228                   0.005
+CorpBonds.w1_03       0.254       0.056                                           0.294       0.629                   0.004                   0.631                   0.338       1.023                   0.019       0.302
+CorpBonds.w1_04                                                                                                       0.031                   0.001                               0.077
+CorpBonds.w1_05                               0.183       0.096                               0.278                                                                                                                                           0.008
+CorpBonds.w1_06       0.005                                                       0.005       0.285       0.224                   0.003       0.393                   0.101       0.756                               0.040                               0.079
+CorpBonds.w1_07                                                       0.289                                           0.110                                                       0.002
+CorpBonds.w1_09       0.416                                                       0.373       0.570                   0.004                   0.746       0.001       0.505       1.012                   0.253       0.441       0.015       0.005
+CorpBonds.w1_10                                                                   0.109                                                                                                                                           0.269       0.084
+CorpBonds.w1_11       0.097                                                                                                                                                                               0.183       0.180       0.188
+CorpBonds.w1_12                               0.134       0.302                                                                                           0.211
+CorpBonds.w1_13                                                       0.293                                           0.015                                                 9.022750E-4
+CorpBonds.w1_14                                                                   0.256       0.091                                                                                                                                           0.230
+CorpBonds.w1_15                                                                                                                               0.002                               0.135
+CorpBonds.w1_16                                                       0.294                                           0.018                                                 9.292880E-4
+CorpBonds.w1_17                               0.246                               0.002                                                       0.081                               0.536       0.294
+CorpBonds.w1_19       0.004                                                       0.006                                                                                                                   0.090       0.087       0.236
+CorpBonds.w1_20                                                                                                                               0.003                               0.188
+GvmtBonds.w1_02                                                                                                                                                                                                                   0.017
+GvmtBonds.w1_17                                                                               0.023
+Cash     .w1_01       1.438                   0.350       0.479       0.532       1.435       1.231                   1.007                   1.092       0.799       1.353       0.774       0.211       1.218       1.418       0.922       0.937
+Cash     .w1_02       1.252       0.768       1.225       1.263       1.275       1.276       1.193       0.907       1.439       0.837       1.109       1.365       1.221       0.994       1.140       1.327       1.241       1.422       1.438       0.870
+Cash     .w1_03       1.218                   0.591       0.721       0.825       1.183       0.886       0.059       1.439                   0.884       1.081       1.144       0.538       0.654       1.426       1.176       1.114       1.195
+Cash     .w1_04       0.904                               0.040                   0.755       0.710                                           1.311       0.178       1.048       1.375                   0.728       0.875       0.567       0.410
+Cash     .w1_05       0.285                                                                                                                   0.718                   0.485       0.763                   0.252       0.253       0.104
+Cash     .w1_06       1.438                   0.380       0.497       0.563       1.438       1.191                   1.080                   1.095       0.818       1.353       0.774       0.297       1.233       1.407       0.910       0.957
+Cash     .w1_07       0.774                                                       0.543       0.469                                           1.197       0.042       0.942       1.338                   0.652       0.744       0.494       0.322
+Cash     .w1_09       1.075       0.064       1.007       1.081       1.103       1.113       0.939       0.374       1.439       0.212       0.783       1.302       0.996       0.547       0.820       1.219       1.053       1.420       1.438       0.279
+Cash     .w1_10                                                                                                                               0.410                   0.185       0.454
+Cash     .w1_11                                                                                                                               0.294                   0.071       0.337
+Cash     .w1_12       0.460                                                       0.101                                                       0.901                   0.663       0.947                   0.426       0.427       0.274       0.082
+Cash     .w1_13       0.742                                                       0.489       0.406                                           1.169       0.008       0.917       1.295                   0.635       0.711       0.478       0.302
+Cash     .w1_14       0.101                                                                                                                   0.524                   0.296       0.568                   0.068       0.069
+Cash     .w1_15       0.951                               0.073                   0.812       0.772                                           1.355       0.224       1.092       1.324                   0.766       0.922       0.605       0.449
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 22:17:50 Page 14
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-        269 VARIABLE x3.L  holding period 3
+        270 VARIABLE x3.L  holding period 3
 
                       w2_01       w2_02       w2_03       w2_04       w2_05       w2_06       w2_07       w2_08       w2_09       w2_10       w2_11       w2_12       w2_13       w2_14       w2_15       w2_16       w2_17       w2_18       w2_19       w2_20
 
-Cash     .w1_15                                                                   1.088       0.965                                                                                                                                           1.082
-Cash     .w1_16       0.806                                                                                                       0.434                               0.077       0.507                               0.771       0.573       0.318       1.039
-Cash     .w1_17                                                                   0.781       0.592                                                                                                                                           1.377       0.086
-Cash     .w1_18       0.372                                                                                                       0.148                                           0.448                               0.486       0.195       0.762       0.723
-Cash     .w1_19       0.015                                                       0.194       0.213                                                                               0.390                               0.247                   1.131       0.459
-Cash     .w1_20                                                                   1.326       1.200                                                                                                                                           0.803
+Cash     .w1_16       0.743                                                       0.491       0.408                                           1.170       0.009       0.918       1.296                   0.636       0.712       0.478       0.303
+Cash     .w1_17       1.179                               0.035       0.144       1.350       1.416                   0.692                   1.371       0.499       1.227       0.969                   0.796       1.158       0.627       0.529
+Cash     .w1_19                                                                                                                               0.330                   0.107       0.373
+Cash     .w1_20       0.988                               0.088                   0.874       0.843                   0.041                   1.387       0.264       1.123       1.276                   0.788       0.960       0.625       0.474
 
 
-----    269 VARIABLE y3.L  sold   period 3
+----    270 VARIABLE y3.L  sold   period 3
 
                       w2_01       w2_02       w2_03       w2_04       w2_05       w2_06       w2_07       w2_08       w2_09       w2_10       w2_11       w2_12       w2_13       w2_14       w2_15       w2_16       w2_17       w2_18       w2_19       w2_20
 
-Stocks   .w1_01                                                                   0.695       0.737                                                                                                                                           0.977
-Stocks   .w1_02                                                                   0.707       1.290                                                                                                                                           0.391
-Stocks   .w1_03                                                                   0.795       1.238                                                                                                                                           0.447
-Stocks   .w1_04                                                                   0.922       1.181                                                                                                                                           0.546
-Stocks   .w1_05                                                                               0.074
-Stocks   .w1_06                                                                   0.092       0.904
-Stocks   .w1_07                                                                   0.348       1.178                                                                                                                                           0.173
-Stocks   .w1_08       0.695                                                                               0.497                   0.669       0.059       0.519       0.504       0.360       0.531       0.332       0.460       0.722       0.224       0.399
-Stocks   .w1_09                                                                   0.698       0.739                                                                                                                                           0.980
-Stocks   .w1_10                                                                   1.036       1.051                                                                                                                                           0.530
-Stocks   .w1_11       0.223                                                                               0.194                   0.201       0.072       0.121       0.185       0.065       0.210       0.152       0.122       0.233       0.030       0.102
-Stocks   .w1_12       0.756                                                                               0.425                   0.684                   0.577       0.433       0.406       0.450       0.252       0.501       0.658       0.256       0.440
-Stocks   .w1_13       0.663                                                       0.217       0.210                               0.418                               0.004       0.699                               0.763       0.476       0.569       0.995
-Stocks   .w1_14                                                                               0.167
-Stocks   .w1_15                                                                   0.842       0.870                                                                                                                                           0.662
-Stocks   .w1_16       0.552                                                       0.646       0.547                               0.156                                           0.175                               0.484       0.312       0.829       0.751
-Stocks   .w1_17                                                                   0.791       0.800                                                                                                                                           0.978
-Stocks   .w1_18       0.025                                                       0.565       0.591                                                                                                                   0.094                   0.824       0.330
-Stocks   .w1_19                                                                   0.517       0.593                                                                                                                                           0.823
-Stocks   .w1_20                                                                   1.012       1.077                                                                                                                                           0.531
-CorpBonds.w1_01       0.370       0.364       0.372       0.390       0.410       0.523       0.461       0.370       0.362       0.404       0.425       0.472       0.371       0.483       0.413       0.391       0.418       0.379       0.453       0.419
-CorpBonds.w1_02       0.102       0.101       0.103       0.108       0.113       0.145       0.127       0.102       0.100       0.112       0.118       0.130       0.103       0.134       0.114       0.108       0.116       0.105       0.125       0.116
-CorpBonds.w1_03       0.125       0.123       0.126       0.132       0.138       0.177       0.156       0.125       0.122       0.136       0.144       0.159       0.125       0.163       0.140       0.132       0.141       0.128       0.153       0.142
-CorpBonds.w1_04       0.145       0.143       0.146       0.153       0.161       0.205       0.181       0.145       0.142       0.158       0.167       0.185       0.145       0.189       0.162       0.153       0.164       0.149       0.178       0.164
-CorpBonds.w1_09       0.369       0.363       0.371       0.389       0.409       0.522       0.459       0.369       0.361       0.403       0.424       0.470       0.370       0.482       0.412       0.390       0.417       0.378       0.452       0.418
-CorpBonds.w1_10       0.241       0.237       0.242       0.254       0.267       0.341       0.300       0.241       0.236       0.263       0.277       0.307       0.241       0.314       0.269       0.255       0.273       0.247       0.295       0.273
-CorpBonds.w1_13       0.387       0.381       0.389       0.407       0.428                               0.386       0.378       0.422       0.445       0.493       0.387       0.505       0.432       0.408       0.437       0.396       0.267       0.438
-CorpBonds.w1_15       0.343       0.338       0.345       0.361       0.380       0.485       0.427       0.343       0.336       0.374       0.394       0.437       0.344       0.447       0.383       0.362       0.388       0.351       0.420       0.389
-CorpBonds.w1_16       0.255       0.250       0.256       0.268       0.282                               0.254       0.249       0.278       0.292       0.324       0.255       0.332       0.284       0.269       0.288       0.261       0.311       0.288
-CorpBonds.w1_17       0.327       0.321       0.328       0.344       0.362       0.461       0.406       0.326       0.319       0.357       0.375       0.416       0.327       0.426       0.365       0.345       0.369       0.335       0.400       0.370
-CorpBonds.w1_18       0.347       0.341       0.348       0.365       0.384       0.401       0.026       0.346       0.339       0.378       0.398       0.442       0.347       0.452       0.387       0.366       0.392       0.355       0.424       0.393
-CorpBonds.w1_19       0.420       0.413       0.422       0.442       0.465       0.593       0.523       0.420       0.411       0.458       0.483       0.535       0.421       0.548       0.469       0.443       0.475       0.430       0.514       0.476
-CorpBonds.w1_20       0.222       0.219       0.223       0.234       0.246       0.314       0.277       0.222       0.217       0.243       0.256       0.283       0.223       0.290       0.248       0.235       0.251       0.228       0.272       0.252
-GvmtBonds.w1_08       0.677       0.684       0.709       0.735       0.771       0.882       0.809       0.726       0.685       0.739       0.800       0.831       0.720       0.251       0.772       0.763       0.298       0.711       0.320       0.122
-GvmtBonds.w1_11       0.276       0.270       0.279       0.290       0.304                               0.286       0.270       0.291       0.315       0.282       0.284       0.081       0.304       0.301       0.145       0.280                   0.086
-GvmtBonds.w1_12       0.687       0.671       0.695       0.720       0.756       0.864       0.793       0.711       0.672       0.725       0.784       0.854       0.706       0.326       0.757       0.748       0.362       0.697       0.131       0.186
+Stocks   .w1_01       0.833                                                       0.798       0.782                   0.338                   0.866       0.215       0.851       0.861                   0.639       0.830       0.373       0.367
+Stocks   .w1_02       0.347                   0.143       0.173       0.172       0.333       0.326                   0.299                   0.360       0.258       0.354       0.359       0.018       0.347       0.345       0.343       0.336
+Stocks   .w1_03       0.716                               0.054       0.120       0.686       0.667                   0.614                   0.743       0.353       0.731       0.737                   0.720       0.712       0.427       0.481
+Stocks   .w1_04       0.666                                                       0.492       0.439                                           1.070                   0.815       1.185                   0.511       0.637       0.355       0.196
+Stocks   .w1_05       0.285                   0.183       0.096                               0.278                                           0.718                   0.485       0.763                   0.252       0.253       0.104       0.008
+Stocks   .w1_06       0.796                                                       0.763       0.745                   0.368                   0.826       0.197       0.812       0.821                   0.614       0.792       0.326       0.348
+Stocks   .w1_07       0.626                                           0.158       0.381       0.301                                           1.047                   0.797       1.175                   0.517       0.596       0.362       0.190
+Stocks   .w1_09       0.697                   0.288       0.347       0.344       0.669       0.654                   0.601                   0.724       0.528       0.711       0.721       0.023       0.698       0.694       0.688       0.676
+Stocks   .w1_10                                                                   0.109                                                       0.410                   0.185       0.454                                           0.269       0.084
+Stocks   .w1_11       0.097                                                                                                                   0.294                   0.071       0.337                   0.183       0.180       0.188
+Stocks   .w1_12       0.460                   0.134       0.302                   0.101                                                       0.901       0.211       0.663       0.947                   0.426       0.427       0.274       0.082
+Stocks   .w1_13       0.620                                           0.184       0.354       0.266                                           1.045                   0.797       1.159                   0.524       0.589       0.369       0.192
+Stocks   .w1_14       0.101                                                       0.256       0.091                                           0.524                   0.296       0.568                   0.068       0.069                   0.230
+Stocks   .w1_15       0.699                                                       0.535       0.485                                           1.101                   0.845       1.177                   0.537       0.670       0.380       0.223
+Stocks   .w1_16       0.620                                           0.185       0.355       0.267                                           1.045                   0.797       1.160                   0.523       0.589       0.369       0.192
+Stocks   .w1_17       0.589                                                       0.704       0.768                   0.053                   0.853                   0.650       0.846                   0.260       0.568       0.102       0.001
+Stocks   .w1_19       0.004                                                       0.006                                                       0.330                   0.107       0.373                   0.090       0.087       0.236
+Stocks   .w1_20       0.709                                                       0.567       0.525                                           1.107 1.582614E-5       0.850       1.153                   0.535       0.681       0.377       0.224
+CorpBonds.w1_01       0.090       0.091       0.069       0.076       0.083       0.096                               0.101       0.082                   0.088                               0.089       0.085       0.066       0.083       0.084       0.083
+CorpBonds.w1_04       0.238       0.232       0.175       0.194       0.211       0.262       0.272       0.207       0.227       0.210       0.241       0.225       0.234       0.189       0.226       0.217       0.238       0.212       0.214       0.211
+CorpBonds.w1_06       0.018       0.022       0.017       0.019       0.020       0.020                               0.025       0.017                   0.022                               0.022       0.021                   0.020       0.021
+CorpBonds.w1_07       0.148       0.144       0.108       0.121                   0.163       0.168       0.128       0.051       0.130       0.150       0.140       0.145       0.163       0.140       0.134       0.148       0.132       0.133       0.131
+CorpBonds.w1_13       0.123       0.119       0.090       0.100                   0.135       0.140       0.106       0.118       0.108       0.125       0.116       0.120       0.136       0.116       0.111       0.123       0.109       0.110       0.109
+CorpBonds.w1_15       0.252       0.245       0.185       0.205       0.223       0.277       0.287       0.219       0.273       0.222       0.254       0.238       0.247       0.147       0.239       0.229       0.252       0.224       0.226       0.223
+CorpBonds.w1_16       0.123       0.120       0.091       0.101                   0.136       0.141       0.107       0.116       0.109       0.125       0.117       0.121       0.137       0.117       0.112       0.123       0.110       0.111       0.109
+CorpBonds.w1_17       0.589       0.573       0.186       0.481       0.522       0.647       0.671       0.512       0.639       0.519       0.517       0.557       0.578       0.123       0.265       0.536       0.589       0.525       0.528       0.522
+CorpBonds.w1_20       0.279       0.271       0.205       0.227       0.247       0.307       0.318       0.242       0.302       0.246       0.281       0.264       0.273       0.123       0.265       0.253       0.279       0.248       0.250       0.247
+GvmtBonds.w1_01       0.515       0.524       0.435       0.452       0.479       0.541       0.582       0.471       0.568       0.497       0.527       0.495       0.512       0.564       0.519       0.494       0.522       0.466       0.486       0.477
+GvmtBonds.w1_02       0.243       0.247       0.205       0.213       0.226       0.255       0.275       0.222       0.268       0.235       0.249       0.234       0.242       0.266       0.245       0.233       0.247       0.203       0.230       0.225
+GvmtBonds.w1_03       0.720       0.732       0.607       0.632       0.669       0.756       0.813       0.658       0.793       0.694       0.737       0.692       0.715       0.788       0.725       0.690       0.730       0.651       0.679       0.667
+GvmtBonds.w1_06       0.624       0.634       0.526       0.547       0.580       0.655       0.705       0.570       0.687       0.601       0.639       0.599       0.620       0.683       0.628       0.598       0.632       0.564       0.589       0.578
+GvmtBonds.w1_09       0.478       0.486       0.403       0.419       0.444       0.502       0.540       0.437       0.527       0.461       0.489       0.459       0.475       0.523       0.481       0.458       0.485       0.432       0.451       0.443
 
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:59:08 Page 15
+GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 22:17:50 Page 15
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-----    269 VARIABLE z3.L  bought period 3
+----    270 VARIABLE z3.L  bought period 3
 
                       w2_01       w2_02       w2_03       w2_04       w2_05       w2_06       w2_07       w2_08       w2_09       w2_10       w2_11       w2_12       w2_13       w2_14       w2_15       w2_16       w2_17       w2_18       w2_19       w2_20
 
-Stocks   .w1_01       0.370       0.364       0.372       0.390       0.410                               0.370       0.362       0.404       0.425       0.472       0.371       0.483       0.413       0.391       0.418       0.379                   0.260
-Stocks   .w1_02       0.102       0.101       0.103       0.108       0.113                               0.102       0.100       0.112       0.118       0.130       0.103       0.134       0.114       0.108       0.116       0.105                   0.116
-Stocks   .w1_03       0.125       0.123       0.126       0.132       0.138                               0.125       0.122       0.136       0.144       0.159       0.125       0.163       0.140       0.132       0.141       0.128                   0.142
-Stocks   .w1_04       0.145       0.143       0.146       0.153       0.161                               0.145       0.142       0.158       0.167       0.185       0.145       0.189       0.162       0.153       0.164       0.149                   0.164
-Stocks   .w1_08                   0.125       0.631       0.341       0.140       0.309       0.182                   0.525
-Stocks   .w1_09       0.369       0.363       0.371       0.389       0.409                               0.369       0.361       0.403       0.424       0.470       0.370       0.482       0.412       0.390       0.417       0.378                   0.264
-Stocks   .w1_10       0.241       0.237       0.242       0.254       0.267                               0.241       0.236       0.263       0.277       0.307       0.241       0.314       0.269       0.255       0.273       0.247                   0.273
-Stocks   .w1_11                   0.048       0.199       0.094       0.008       0.113       0.062                   0.170
-Stocks   .w1_12                   0.192       0.695       0.419       0.226       0.239       0.121                   0.595                   0.031
-Stocks   .w1_13                   0.381       0.389       0.407       0.428                               0.068       0.378                   0.445       0.493                               0.158       0.408
-Stocks   .w1_15       0.343       0.338       0.345       0.361       0.380                               0.343       0.336       0.374       0.394       0.437       0.344       0.447       0.383       0.362       0.388       0.351                   0.389
-Stocks   .w1_16                   0.250       0.256       0.268       0.282                               0.254       0.249                   0.292       0.324       0.178                   0.284       0.269
-Stocks   .w1_17       0.327       0.321       0.328       0.344       0.362                               0.326       0.319       0.357       0.375       0.416       0.327       0.426       0.365       0.345       0.369       0.335                   0.284
-Stocks   .w1_18                   0.341       0.348       0.365       0.384                               0.346       0.339       0.230       0.398       0.442       0.347       0.004       0.387       0.366                   0.160
-Stocks   .w1_19       0.405       0.413       0.422       0.442       0.465                               0.420       0.411       0.458       0.483       0.535       0.421       0.158       0.469       0.443       0.228       0.430                   0.017
-Stocks   .w1_20       0.222       0.219       0.223       0.234       0.246                               0.222       0.217       0.243       0.256       0.283       0.223       0.290       0.248       0.235       0.251       0.228                   0.252
-CorpBonds.w1_08                                                                   0.572       0.628                                                                                                                                           0.544
-CorpBonds.w1_12                                                                   0.625       0.673                                                                                                                                           0.387
-CorpBonds.w1_13                                                                   0.217       0.210
-CorpBonds.w1_16                                                                   0.207       0.547
-GvmtBonds.w1_01                                                                   0.582       0.645
-GvmtBonds.w1_03                                                                               0.030
-GvmtBonds.w1_04                                                                               0.130
-GvmtBonds.w1_09                                                                   0.576       0.640
-GvmtBonds.w1_10                                                                               0.162
-GvmtBonds.w1_11                                                                   0.433       0.395                                                                                                                                           0.146
-GvmtBonds.w1_13                                                                                                                                                                                                                               0.836
-GvmtBonds.w1_15                                                                   0.239       0.332
-GvmtBonds.w1_16                                                                   0.439                                                                                                                                                       0.822
-GvmtBonds.w1_17                                                                   0.471       0.615
-GvmtBonds.w1_18                                                                   0.965       0.616                                                                                                                                           0.486
-GvmtBonds.w1_19                                                                   0.917       0.902                                                                                                                                           0.206
-GvmtBonds.w1_20                                                                               0.154
+Stocks   .w1_01                   0.615       0.153       0.050       0.030                               0.420                   0.579                                                       0.396                                                       0.560
+Stocks   .w1_02                   0.357                                                                   0.191                   0.275                                                                                                                   0.233
+Stocks   .w1_03                   0.711       0.051                                                       0.635                   0.729                                                       0.106                                                       0.702
+Stocks   .w1_04                   0.232       0.175       0.155       0.211                               0.207       0.227       0.210                   0.047                               0.226                                                       0.211
+Stocks   .w1_06                   0.656       0.163       0.069       0.037                               0.367                   0.619                                                       0.353                                                       0.519
+Stocks   .w1_07                   0.144       0.108       0.121                                           0.128       0.051       0.130                   0.098                               0.140                                                       0.131
+Stocks   .w1_09                   0.737                                                                   0.378                   0.564                                                                                                                   0.479
+Stocks   .w1_13                   0.119       0.090       0.100                                           0.106       0.118       0.108                   0.108                               0.116                                                       0.109
+Stocks   .w1_15                   0.245       0.185       0.133       0.223                               0.219       0.273       0.222                   0.014                               0.239                                                       0.223
+Stocks   .w1_16                   0.120       0.091       0.101                                           0.107       0.116       0.109                   0.108                               0.117                                                       0.109
+Stocks   .w1_17                   0.573       0.186       0.446       0.378                               0.512                   0.519                   0.058                               0.265                                                       0.522
+Stocks   .w1_20                   0.271       0.205       0.140       0.247                               0.242       0.261       0.246                                                       0.265                                                       0.247
+CorpBonds.w1_01                                                                               0.133       0.052                               0.301                   0.010       0.651
+CorpBonds.w1_02       0.216                         2.563462E-4 4.930537E-4       0.189       0.283                   0.004                   0.377       0.002       0.250       0.507                   0.131       0.228                   0.005
+CorpBonds.w1_03       0.254       0.056                                           0.294       0.629                   0.004                   0.631                   0.338       1.023                   0.019       0.302
+CorpBonds.w1_05                               0.183       0.096                               0.278                                                                                                                                           0.008
+CorpBonds.w1_06                                                                               0.259       0.204                               0.370                   0.079       0.730                               0.017                               0.059
+CorpBonds.w1_07                                                       0.158
+CorpBonds.w1_09       0.416                                                       0.373       0.570                   0.004                   0.746       0.001       0.505       1.012                   0.253       0.441       0.015       0.005
+CorpBonds.w1_10                                                                   0.109                                                                                                                                           0.269       0.084
+CorpBonds.w1_11       0.097                                                                                                                                                                               0.183       0.180       0.188
+CorpBonds.w1_12                               0.134       0.302                                                                                           0.211
+CorpBonds.w1_13                                                       0.184
+CorpBonds.w1_14                                                                   0.256       0.091                                                                                                                                           0.230
+CorpBonds.w1_16                                                       0.185
+CorpBonds.w1_19       0.004                                                       0.006                                                                                                                   0.090       0.087       0.236
+GvmtBonds.w1_17                                                                               0.023
 
 
 **** REPORT FILE SUMMARY
@@ -692,10 +681,7 @@ GvmtBonds.w1_20                                                                 
 results /Users/michellezhang/Desktop/endowment_fund/Asset_multi-stage/results.txt
 
 
-EXECUTION TIME       =        0.019 SECONDS      5 MB  25.0.2 r65346 DEX-DEG
-GAMS 25.0.2  r65346 Released Jan 31, 2018 DEX-DEG x86 64bit/Mac OS X                                                                                                                                                                  03/08/18 21:59:08 Page 16
-G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-E x e c u t i o n
+EXECUTION TIME       =        0.016 SECONDS      5 MB  25.0.2 r65346 DEX-DEG
 
 
 USER: MS&E 348  Optimization under Uncertainty       G180131/0001AS-GEN

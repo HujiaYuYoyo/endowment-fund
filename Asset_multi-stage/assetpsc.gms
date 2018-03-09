@@ -44,6 +44,7 @@ option iterlim = 1000000;
 option solprint = off;
 option lp = minos5;
 option nlp = minos5;
+Option Seed=1;
 
 set w1 scenarios /w1_01*w1_20/;
 set w2 scenarios /w2_01*w2_20/;

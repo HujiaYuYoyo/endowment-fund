@@ -78,6 +78,7 @@ option iterlim = 1000000;
 option solprint = off;
 option lp = minos5;
 option nlp = minos5;
+option Seed = 1;
 
 Set
 	w1	"first stage scenarios"		/w1_01*w1_20/
@@ -169,8 +170,8 @@ r3std_est(i) = sqrt(sum(w3, sqr(r3(i,w3) - r3bar_est(i)))/(n3-1));
 
 * Sampling - std correction
 r1(i, w1) = r1(i, w1)*rstd(i)/r1std_est(i);
-r2(i, w2) = r2(i, w2)*rstd(i)/r1std_est(i);
-r3(i, w3) = r3(i, w3)*rstd(i)/r1std_est(i);
+r2(i, w2) = r2(i, w2)*rstd(i)/r2std_est(i);
+r3(i, w3) = r3(i, w3)*rstd(i)/r3std_est(i);
 
 r1std_est(i) = sqrt(sum(w1, sqr(r1(i,w1)- r1bar_est(i)))/(n1-1));
 r2std_est(i) = sqrt(sum(w2, sqr(r2(i,w2)- r2bar_est(i)))/(n2-1));
