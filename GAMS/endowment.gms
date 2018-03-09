@@ -5,38 +5,13 @@
 * asset allocation and then rebalancing in each stochastic stage.
 
 * Data - from fitted distributions
+*----------------------------------------------------------------------
+$include "assetm.inc"
+*----------------------------------------------------------------------
+
 Set 
-	i "assets"	/stock, cbond, gbond, alter, cash/
 	ci(i) "cash asset" /cash/
 	ai(i) "non-cash assets" /stock, cbond, gbond, alter/;
-
-Alias (i, ii);
-
-Parameter rbar(i) "mean returns"
-/
-stock	0.06044
-cbond	-0.03083
-gbond	-0.00891
-alter	0.054306
-cash	-0.00267
-/;
-
-Parameter rstd(i) "standard deviation of returns"
-/
-stock	0.15326
-cbond	0.14756
-gbond	0.09429
-alter	0.04826
-cash	0.00737
-/;
-
-Table chol(i, ii) "covariance matrix of returns"
-	stock	cbond	gbond	alter	cash
-stock	0.15326	0.04216	-0.0074 0.00097	0.03874
-cbond	0.00000	0.20000	0.08114	0.00550	0.00551
-gbond	0.00000	0.00000	0.04746	0.00061	-0.00863
-alter	0.00000	0.00000	0.00000	0.00476	-0.00341
-cash	0.00000	0.00000	0.00000	0.00000	0.02668;
 
 * Model params
 Scalar 
@@ -50,26 +25,24 @@ x0(ai) = 0;
 x0(ci) = w0;
 display x0;
 
-Parameter strc(i)	"sell transaction cost/asset"
-/
-stock 	0.030
-cbond 	0.015
-gbond	0.015
-alter	0.01
-cash	0.00
-/;
+Parameter 
+	strc(i)	"sell transaction cost/asset"
+	btrc(i) "buy transaction cost/asset";
 
-Parameter btrc(i)	"buy transaction cost/asset"
-/
-stock	0.030
-cbond	0.015
-gbond	0.015
-alter	0.01
-cash	0.00
-/;
+strc("stock") = 0.030;
+strc("cbond") = 0.015;
+strc("gbond") = 0.015;
+strc("alter") = 0.01;
+strc("cash") = 0.00;
 
-*strc(i) = 0.0005;  
-*btrc(i) = 0.0005;
+btrc("stock") = 0.030;
+btrc("cbond") = 0.015;
+btrc("gbond") = 0.015;
+btrc("alter") = 0.01;
+btrc("cash") = 0.00;
+
+*strc(i) = 0.0;  
+*btrc(i) = 0.0;
 
 * Settings - define scenarios
 options limrow = 0, limcol = 0;
