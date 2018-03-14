@@ -35,9 +35,9 @@ option nlp = minos5;
 option Seed = 1;
 
 Set
-	w1	"first stage scenarios"		/w1_01*w1_20/
-	w2 	"second stage scenarios"	/w2_01*w2_20/
-	w3	"third stage scenarios"		/w3_01*w3_20/;
+	w1	"first stage scenarios"		/w1_01*w1_25/
+	w2 	"second stage scenarios"	/w2_01*w2_25/
+	w3	"third stage scenarios"		/w3_01*w3_25/;
 
 Scalars 
 	n1	"number of scenarios in stage 1"
@@ -266,7 +266,7 @@ Equations
 	crebalance3(ci,w1,w2)	"rebalancing for cash, at stage 3"
 	termw(w1,w2,w3)	"terminal utility constraints";
 
-objfunc..	utility =e= sup*sum((w1,w2,w3),u(w1,w2,w3))/nall - sdo*sum((w1,w2,w3),v(w1,w2,w3))/nall;
+objfunc..	utility =e= sum((w1,w2,w3),(sum(i,r3(i,w3)*x3(i,w1,w2))**(1-alpha)-1)/(1-alpha))/nall;
 
 abalance1(ai).. x1(ai) + y1(ai) - z1(ai) =e= x0(ai);
 
@@ -283,34 +283,40 @@ crebalance3(ci,w1,w2).. -r2(ci,w2)*x2(ci,w1) + x3(ci,w1,w2) + sum(ii, -(1-strc3(
 termw(w1,w2,w3).. -sum(i,r3(i,w3)*x3(i,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= -wtarget + cf4(w1,w2,w3);
 
 * Solve
-option lp = cplex;
-*option mpec=nlpec;
+*option lp = cplex;
+option mpec=nlpec;
 
 Model endowment /all/;
-Solve endowment using lp maximizing utility;
-*Solve endowment using mpec maximizing utility;
+*Solve endowment using lp maximizing utility;
+Solve endowment using mpec maximizing utility;
 
 display utility.l, x1.l, y1.l, z1.l, x2.l, y2.l, z2.l, x3.l, y3.l, z3.l;
 
 File results / results.txt /;
 put results;
 put "Objective", utility.l /;
-put "Stage 1 x1 y1 z1 "/;
+put "STAGE 1 x1 "/;
 loop(i,
-  put x1.l(i), y1.l(i), z1.l(i)/
+  put i.tl, x1.l(i)/;
 );
-put "Stage 2 x2 y2 z2 "/;
+put "STAGE 2 x2 "/;
 loop(w1,
-	put "scenario:"/;
 	loop(i, 
-		put x2.l(i, w1), y2.l(i, w1), z2.l(i, w1)/;
+		put i.tl, sum(ii, x2.l(ii, w1)), x2.l(i, w1)/;
 	);
 );
-put "Stage 3 x3 y3 z3 "/;
-loop((w1, w2),
-	put "scenario:"/;
+put "STAGE 2 x2 wealth totals"/;
+loop(w1,
+	put sum(i, x2.l(i, w1))/;
+);
+put "STAGE 3 x3 "/;
+loop((w1,w2),
 	loop(i, 
-		put x3.l(i, w1, w2), y3.l(i, w1, w2), z3.l(i, w1, w2)/;
+		put i.tl, sum(ii, x3.l(ii, w1, w2)), x3.l(i, w1, w2)/;
 	);
+);
+put "STAGE 3 x3 wealth totals"/;
+loop((w1,w2),
+	put sum(i, x3.l(i, w1, w2))/;
 );
 putclose;
