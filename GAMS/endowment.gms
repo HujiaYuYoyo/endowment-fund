@@ -25,25 +25,6 @@ x0(ai) = 0;
 x0(ci) = w0;
 display x0;
 
-Parameter 
-	strc(i)	"sell transaction cost/asset"
-	btrc(i) "buy transaction cost/asset";
-
-strc("stock") = 0.030;
-strc("cbond") = 0.015;
-strc("gbond") = 0.015;
-strc("alter") = 0.01;
-strc("cash") = 0.00;
-
-btrc("stock") = 0.030;
-btrc("cbond") = 0.015;
-btrc("gbond") = 0.015;
-btrc("alter") = 0.01;
-btrc("cash") = 0.00;
-
-*strc(i) = 0.0;  
-*btrc(i) = 0.0;
-
 * Settings - define scenarios
 options limrow = 0, limcol = 0;
 option reslim = 1000000;
@@ -167,6 +148,10 @@ r1(i, w1) = exp(r1(i, w1));
 r2(i, w2) = exp(r2(i, w2));
 r3(i, w3) = exp(r3(i, w3));
 
+r1bar_est(i) = sum(w1, r1(i,w1))/n1;
+r2bar_est(i) = sum(w2, r2(i,w2))/n2;
+r3bar_est(i) = sum(w3, r3(i,w3))/n3;
+
 display r1, r2, r3;
 
 * Stage params
@@ -198,11 +183,42 @@ y2.up(ci,w1) = 0;
 z3.up(ci,w1,w2) = 0;
 y3.up(ci,w1,w2) = 0;
 
+* Define state-dependent transaction costs
+Parameter basis(i) "baseline transaction cost for assets"
+/
+stock	0.005
+cbond	0.0025
+gbond	0.0025
+alter	0.01
+cash	0.00
+/;
+
+Parameter 
+	strc1(i)	"sell transaction cost/asset for stage 1"
+	btrc1(i) 	"buy transaction cost/asset for stage 1"
+	strc2(i,w1)	"sell transaction cost/asset for stage 2"
+	btrc2(i,w1) 	"buy transaction cost/asset for stage 2"
+	strc3(i,w2)	"sell transaction cost/asset for stage 3"
+	btrc3(i,w2) 	"buy transaction cost/asset for stage 3";
+
+strc1(i) = basis(i);
+btrc1(i) = basis(i);
+
+strc2(i,w1) = basis(i) + basis(i) * (r1(i, w1)/r1bar_est(i) - 1);
+btrc2(i,w1) = basis(i) + basis(i) * (-r1(i, w1)/r1bar_est(i) + 1);
+
+strc3(i,w2) = basis(i) + basis(i) * (r2(i, w2)/r2bar_est(i) - 1);
+btrc3(i,w2) = basis(i) + basis(i) * (-r2(i, w2)/r2bar_est(i) + 1);
+
+*strc(i) = 0.0;  
+*btrc(i) = 0.0;
+
 display x1.l, y1.l, z1.l;
 
 * Definitions for utility
 Scalar
-	alpha		"alpha for utility function"	/20/;
+	alpha		"alpha for utility function"	/20/
+	lambda		"lambda for utility function"	/10/;
 
 Parameters
 	sup		"upside slope"
@@ -226,7 +242,16 @@ Free Variable
 * Power:
 * utility =e= sum((w1,w2,w3),(sum(i,r3(i,w3)*x3(i,w1,w2))**(1-alpha)-1)/(1-alpha))/nall;
 *
+* Quadratic Variant, p.211 in DAA strategies:
+* utility =e= sum((w1,w2,w3), sum(i,r3(i,w3)*x3(i,w1,w2)) - lambda / 2 * (max(0, wtarget - sum(i,r3(i,w3)*x3(i,w1,w2))))**2)/nall;
+*
 * CVar:
+*
+* 
+* Diversification constraints:
+* diversify1(i)	"diversification constraint at stage 1"
+* diversify2(i,w1)	"diversification constraint at stage 2"
+* diversify3(i,w1,w2)	"diversification constraint at stage 3"
 *
 *
 
@@ -245,15 +270,15 @@ objfunc..	utility =e= sup*sum((w1,w2,w3),u(w1,w2,w3))/nall - sdo*sum((w1,w2,w3),
 
 abalance1(ai).. x1(ai) + y1(ai) - z1(ai) =e= x0(ai);
 
-cbalance1(ci).. x1(ci) + sum(ii, -(1-strc(ii))*y1(ii) + (1+btrc(ii))*z1(ii)) =e= x0(ci) + cf1;
+cbalance1(ci).. x1(ci) + sum(ii, -(1-strc1(ii))*y1(ii) + (1+btrc1(ii))*z1(ii)) =e= x0(ci) + cf1;
 
 arebalance2(ai,w1).. -r1(ai,w1)*x1(ai) + x2(ai,w1) + y2(ai, w1) - z2(ai,w1) =e= 0;
 
-crebalance2(ci,w1).. -r1(ci,w1)*x1(ci) + x2(ci,w1) + sum(ii, -(1-strc(ii))*y2(ii,w1) + (1+btrc(ii))*z2(ii,w1)) =e= cf2(w1);
+crebalance2(ci,w1).. -r1(ci,w1)*x1(ci) + x2(ci,w1) + sum(ii, -(1-strc2(ii,w1))*y2(ii,w1) + (1+btrc2(ii,w1))*z2(ii,w1)) =e= cf2(w1);
 
 arebalance3(ai,w1,w2).. -r2(ai,w2)*x2(ai,w1) + x3(ai,w1,w2) + y3(ai,w1,w2) - z3(ai,w1,w2) =e= 0;
 
-crebalance3(ci,w1,w2).. -r2(ci,w2)*x2(ci,w1) + x3(ci,w1,w2) + sum(ii, -(1-strc(ii))*y3(ii,w1,w2) + (1+btrc(ii))*z3(ii,w1,w2)) =e= cf3(w1,w2);
+crebalance3(ci,w1,w2).. -r2(ci,w2)*x2(ci,w1) + x3(ci,w1,w2) + sum(ii, -(1-strc3(ii,w2))*y3(ii,w1,w2) + (1+btrc3(ii,w2))*z3(ii,w1,w2)) =e= cf3(w1,w2);
 
 termw(w1,w2,w3).. -sum(i,r3(i,w3)*x3(i,w1,w2)) + u(w1,w2,w3) - v(w1,w2,w3) =e= -wtarget + cf4(w1,w2,w3);
 
