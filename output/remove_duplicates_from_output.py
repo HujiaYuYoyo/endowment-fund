@@ -16,6 +16,10 @@ with open(filename) as fp:
 		if not stock:
 			break
 
+		cbond = cbond.replace('cbond', 'corpbond')
+		gbond = gbond.replace('gbond', 'govbond')
+		alter = alter.replace('alter', 'hedgefund')
+
 		wealth = float(stock.split(',')[1])
 		if wealth not in seen_wealths:
 			new_file.write(stock)
