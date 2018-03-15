@@ -5,17 +5,22 @@ library(quantmod)
 setwd("/Users/michellezhang/Desktop/endowment_fund")
 rm(list = ls())
 
-# indexes_data.xlsx provided
+# indexes_data.xlsx provided up to 1/31
 index_data = read_excel("indexes_data.xlsx")
-hedge_data = read_excel("hedgefund.xlsx")
-am_hedge_data = read_excel("hedgefund_amurica.xlsx")
+# hedge fund data is from 2000 onwards
+hedge_data = read_excel("hedgefund.xlsx")  
+am_hedge_data = read_excel("hedgefund_amurica.xlsx")  
 
-hedge_data_price = hedge_data[100:221, 3]
-am_hedge_data_price = am_hedge_data[100:221, 3]
+# goes up to 1-31-2018
+gov_bond_data = read.table("govbond.txt", header=FALSE)
+corp_bond_data = read.table("corpbond.txt", header=FALSE)
 
-hedge_data = hedge_data[100:221, 2]
-am_hedge_data = am_hedge_data[100:221, 2]
+gov_bond_data = gov_bond_data[,1]
+corp_bond_data = corp_bond_data[,1]
+cash_data = cash_data[,1]
 
+hedge_data = hedge_data[4:220, 2]
+am_hedge_data = am_hedge_data[4:220, 2]
 
 hedge_data = as.numeric(unlist(hedge_data)) / 100
 am_hedge_data = as.numeric(unlist(am_hedge_data)) / 100
@@ -36,47 +41,46 @@ cash = c("BIL")
 assets = c(stocks, bonds, alternative, cash)
 
 # gets the return of an asset denoted by its symbol from Yahoo Finance
-get_return <- function(symbol, from_date, to_date) {
-  s = getSymbols(symbol, from=from_date, to=to_date, auto.assign = F)
+get_return <- function(symbol, to_date, from_date) {
+  s = getSymbols(symbol, to=to_date, from=from_date, auto.assign = F)
   s_adj_close = data.frame(s)[,6]
-  periodReturn(s, period='monthly',from=from_date, to=to_date)  
+  x = periodReturn(s, period='monthly')
 }
 
 # define params
 returns = c()
-prices = c()
-from_date = "2008-01-01"
-to_date = "2018-03-01"
+to_date = "2018-02-01"
+from_date = "1995-01-01"
 
-years = as.matrix(get_return("^GSPC", from_date, to_date))
+## build up vector of returns from assets
+#for (i in 1:length(assets)) { 
+#  asset <- assets[i]
+#  return <- as.numeric(get_return(asset, to_date))
+#  returns <- cbind(returns, return)
+#}
 
-# build up vector of returns from assets
-for (i in 1:length(assets)) { 
-  asset <- assets[i]
-  return <- as.numeric(get_return(asset, from_date, to_date))
-  returns <- cbind(returns, return)
-  
-  price <- as.numeric(data.frame(getSymbols(asset, from=from_date, to=to_date, auto.assign = F))[,6])
-  prices <- cbind(prices, price)
-}
+cash <- as.numeric(get_return("BIL", to_date, from_date))
 
-# add hedge fund index
-returns <- returns[1:122, 1:4]
-returns <- cbind(returns, hedge_data)
+sp500 <- as.numeric(get_return("^GSPC", to_date, from_date))
+sp500 <- sp500[149:277]
 
-prices <- prices[1:122, 1:4]
-prices <- cbind(prices, hedge_data_price)
-prices_with_date <- cbind(seq(1:122), prices)
+gov_bond_data <- gov_bond_data[102:230]
+corp_bond_data <- corp_bond_data[330:458]
 
-# plot returns
-colnames(prices_with_date) <- c("MONTH", "STOCK", "CORPBOND", "GOVBOND", "CASH", "HEDGEFUND")
-ggplot(prices_with_date, aes(MONTH)) + 
-  geom_line(aes(y = STOCK, colour = "STOCK")) 
+hedge_data <- hedge_data[89:217]
+am_hedge_data <- am_hedge_data[89:217]
+
+## add hedge fund index
+#returns <- returns[1:122, 1:4]
+#returns <- cbind(returns, hedge_data)
+
+# create return matrix
+returns = cbind(sp500, corp_bond_data, gov_bond_data, hedge_data, cash)
 
 # take log of returns
 log_returns <- log(returns + 1)
 df <- data.frame(log_returns)
-assets = c(assets, "HEDGE")
+assets = c("stock", "cbond", "gbond", "hedgefund", "cash")
 colnames(df) <- assets
 
 # fit distribution

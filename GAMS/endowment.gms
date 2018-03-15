@@ -35,9 +35,9 @@ option nlp = minos5;
 option Seed = 1;
 
 Set
-	w1	"first stage scenarios"		/w1_01*w1_25/
-	w2 	"second stage scenarios"	/w2_01*w2_25/
-	w3	"third stage scenarios"		/w3_01*w3_25/;
+	w1	"first stage scenarios"		/w1_01*w1_30/
+	w2 	"second stage scenarios"	/w2_01*w2_30/
+	w3	"third stage scenarios"		/w3_01*w3_30/;
 
 Scalars 
 	n1	"number of scenarios in stage 1"
@@ -63,9 +63,9 @@ Parameters
 	cf4(w1,w2,w3)	"cash flow into 4 from end of stage 3";
 
 cf1				= 0.0;
-cf2(w1)			= 0.0;
-cf3(w1,w2) 		= 0.0;
-cf4(w1,w2,w3) 	= 0.0;
+cf2(w1)			= -0.04;
+cf3(w1,w2) 		= -0.04;
+cf4(w1,w2,w3) 	= -0.04;
 
 * Sampling - use cholesky and lognormal
 Parameters
@@ -241,6 +241,7 @@ Free Variable
 *
 * Power:
 * utility =e= sum((w1,w2,w3),(sum(i,r3(i,w3)*x3(i,w1,w2))**(1-alpha)-1)/(1-alpha))/nall;
+* utility =e= sum((w1,w2,w3),((sum(i,(r3(i,w3)*x3(i,w1,w2))) - cf4(w1,w2,w3))**(1-alpha)-1)/(1-alpha))/nall;
 *
 * Quadratic Variant, p.211 in DAA strategies:
 * utility =e= sum((w1,w2,w3), sum(i,r3(i,w3)*x3(i,w1,w2)) - lambda / 2 * (max(0, wtarget - sum(i,r3(i,w3)*x3(i,w1,w2))))**2)/nall;
@@ -266,7 +267,7 @@ Equations
 	crebalance3(ci,w1,w2)	"rebalancing for cash, at stage 3"
 	termw(w1,w2,w3)	"terminal utility constraints";
 
-objfunc..	utility =e= sum((w1,w2,w3),(sum(i,r3(i,w3)*x3(i,w1,w2))**(1-alpha)-1)/(1-alpha))/nall;
+objfunc..	utility =e= sum((w1,w2,w3),((sum(i,(r3(i,w3)*x3(i,w1,w2))) - cf4(w1,w2,w3))**(1-alpha)-1)/(1-alpha))/nall;
 
 abalance1(ai).. x1(ai) + y1(ai) - z1(ai) =e= x0(ai);
 

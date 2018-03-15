@@ -10,8 +10,8 @@ library(dplyr)
 rm(list = ls())
 setwd("/Users/michellezhang/Desktop/endowment_fund/output")
 
-df = read.table("power_output.txt", sep=",", header = FALSE)
-df2 = read.table("power_wealths.txt", header = FALSE)
+df = read.table("p3_allocations.txt", sep=",", header = FALSE)
+df2 = read.table("p3_wealth.txt", header = FALSE)
 
 names(df) = c("assets", "wealth", "fraction")
 names(df2) = c("wealth")
@@ -20,10 +20,10 @@ df = arrange(df, wealth)
 
 # stacked area graph
 ggplot(df, aes(x=wealth,y=fraction,group=assets,fill=assets)) + geom_area(position="fill") +
-  labs(title="Asset allocation for 2nd stage")
+  labs(title="Stage 3 asset allocation - Power function")
 
 # histogram
 ggplot(df2, aes(x=wealth)) + 
   geom_histogram(binwidth=0.05, color="black", fill="blue") +
-  labs(title="Wealth by scenario for 2nd stage")
+  labs(title="Stage 3 wealth - Power function")
 
