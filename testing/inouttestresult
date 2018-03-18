@@ -1,0 +1,4 @@
+insample vs outofsample test result on cvar minimization model
+
+alpha 	size 	expret	payout		in1			in2			in3			cvar		out-1 	out-2 	out-3 
+0.01	20		2%		4%			1.0515		1.0702		1.0835		0.095		1.0515	1.07	1.0834

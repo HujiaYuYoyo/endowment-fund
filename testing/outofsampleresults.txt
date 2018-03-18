@@ -1,0 +1,19 @@
+        0.00       -0.37
+Stage 1
+        0.27
+        0.00
+        0.00
+        0.73
+        0.00
+Total return at each scenario for stage 1
+Expected return at each scenario for stage 1
+       31.57
+       30.00
+Stage 2
+Expected return at each scenario for stage 2
+      924.28
+      900.00
+Stage 3
+Expected return at each scenario for stage 3
+    27729.69
+    27000.00
