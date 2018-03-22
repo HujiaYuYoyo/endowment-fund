@@ -8,7 +8,7 @@ library(ggplot2)
 library(dplyr)
 
 rm(list = ls())
-setwd("/Users/michellezhang/Desktop/endowment_fund/output")
+setwd("...")
 
 df = read.table("p3_allocations.txt", sep=",", header = FALSE)
 df2 = read.table("p3_wealth.txt", header = FALSE)
