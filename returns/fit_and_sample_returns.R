@@ -2,23 +2,16 @@ library(readxl)
 library(quantmod)
 
 # setup environment
-setwd("...")
+setwd("/Users/michellezhang/Desktop/endowment_fund/returns")
 rm(list = ls())
 
 # indexes_data.xlsx provided
 index_data = read_excel("indexes_data.xlsx")
+
 hedge_data = read_excel("hedgefund.xlsx")
-am_hedge_data = read_excel("hedgefund_amurica.xlsx")
-
 hedge_data_price = hedge_data[100:221, 3]
-am_hedge_data_price = am_hedge_data[100:221, 3]
-
 hedge_data = hedge_data[100:221, 2]
-am_hedge_data = am_hedge_data[100:221, 2]
-
-
 hedge_data = as.numeric(unlist(hedge_data)) / 100
-am_hedge_data = as.numeric(unlist(am_hedge_data)) / 100
 
 # stocks we're using
 stocks = c("^GSPC")
@@ -48,8 +41,6 @@ prices = c()
 from_date = "2008-01-01"
 to_date = "2018-03-01"
 
-years = as.matrix(get_return("^GSPC", from_date, to_date))
-
 # build up vector of returns from assets
 for (i in 1:length(assets)) { 
   asset <- assets[i]
@@ -64,14 +55,32 @@ for (i in 1:length(assets)) {
 returns <- returns[1:122, 1:4]
 returns <- cbind(returns, hedge_data)
 
-prices <- prices[1:122, 1:4]
-prices <- cbind(prices, hedge_data_price)
-prices_with_date <- cbind(seq(1:122), prices)
+
+years = as.matrix(get_return("^GSPC", from_date, to_date))
+
+x <- seq(as.Date("2008-02-01"), by="1 month", length.out=121)
+x_breaks <- seq(as.Date("2008-02-01"), as.Date("2018-02-01"), by="1 year")
+x_labels <- as.character(x_breaks, format="%h-%y")
+
+returns_with_index <- returns[2:122, 1:5]
+df <- data.frame(TIME=x, RETURNS=returns_with_index)
 
 # plot returns
-colnames(prices_with_date) <- c("MONTH", "STOCK", "CORPBOND", "GOVBOND", "CASH", "HEDGEFUND")
-ggplot(prices_with_date, aes(MONTH)) + 
-  geom_line(aes(y = STOCK, colour = "STOCK")) 
+library(ggplot2)
+colnames(df) <- c("TIME", "STOCK", "CORPBOND", "GOVBOND", "CASH", "HEDGEFUND")
+ggplot(df, aes(TIME)) + 
+  geom_line(aes(y = STOCK, colour = "S&P 500 Index")) +
+  geom_line(aes(y = CORPBOND, colour = "iShares iBoxx $ Invmt Grade Corp Bd ETF")) +
+  geom_line(aes(y = GOVBOND, colour = "iShares 7-10 Year Treasury Bd ETF")) +
+  geom_line(aes(y = HEDGEFUND, colour = "Eurekahedge Hedge Fund Index")) +
+  geom_line(aes(y = CASH, colour = "SPDR Blmbg Barclays 1-3 Mth T-Bill ETF")) +
+  ggtitle("10-Year Return for Assets") +
+  labs(y="Return", x="Time") +
+  theme(legend.position = c(0.75, 0.25)) +
+  labs(colour="") +
+  scale_color_manual(values=c("#9933ff", "#cc0000", "#666699", "#0066ff", "#33cc33")) +
+  ylim(-0.3, 0.2) +
+  scale_x_date(breaks=x_breaks, labels=x_labels, minor_breaks=df$TIME)
 
 # take log of returns
 log_returns <- log(returns + 1)
@@ -103,15 +112,11 @@ df.chol
 ############################################
 
 # use qq-plot to check for goodness-of-fit
-qqnorm(returns)
-
-# the idea is that return follows a normal distribution and implies
-# that stock price follows a lognormal distribution, where S(t) = S(0)exp(r)
+qqnorm(log_returns)
 
 # alternatively, we might want to try autoregressive (AR) models
-library('ggplot2')
-library('forecast')
-library('tseries')
+#library('forecast')
+#library('tseries')
 
 #sp500 <- as.numeric(get_return("^GSPC", from_date, to_date))
 #sp500_train <-sp500[1:(0.9 * length(sp500))] 
